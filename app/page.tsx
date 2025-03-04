@@ -71,11 +71,11 @@ const ProgressIndicator = ({ currentStep }: { currentStep: number }) => (
     <span className={`mr-2 ${currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       1. Find MP
     </span>
-    <span className="mr-2 dark:text-gray-300">></span>
+    <span className="mr-2 dark:text-gray-300"></span>
     <span className={`mr-2 ${currentStep >= 2 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       2. Write Message
     </span>
-    <span className="mr-2 dark:text-gray-300">></span>
+    <span className="mr-2 dark:text-gray-300"></span>
     <span className={`${currentStep >= 3 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       3. Send
     </span>
