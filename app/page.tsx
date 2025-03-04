@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import html2canvas from "html2canvas";
 import Link from "next/link";
-import Head from "next/head"; // Added for OG tags
+import Head from "next/head";
 import ReCAPTCHA from "react-google-recaptcha";
 
 type MPDetails = {
@@ -113,23 +113,23 @@ export default function Home() {
   const tidiedLetterRef = useRef<HTMLPreElement | HTMLTextAreaElement>(null);
 
   const issueOptions = [
-    "Government Overreach – (Free speech restrictions, arrests for criticizing policies, hate speech laws)",
-    "Government Accountability – (Policy transparency, Online Safety Act concerns, government oversight)",
-    "Cost of Living – (Food prices, energy bills, financial pressures)",
-    "Healthcare – (NHS staff shortages, NHS waiting times, access to services)",
-    "Social Care & Welfare – (Access delays, quality concerns, funding shortfalls)",
-    "Education – (Teacher shortages, funding pressure, youth services)",
-    "Housing – (Affordability, homelessness, social housing)",
-    "Jobs & Economy – (Employment opportunities, local economy stagnation)",
-    "Community & Cohesion – (Immigration, integration issues, local service strain)",
-    "Crime & Safety – (Local crime, policing, community safety)",
-    "Public Transport & Roads – (Transport access, road maintenance, reliability)",
-    "Environment – (Sustainability, pollution, green spaces)",
-    "Other – (Specify your own issue)",
+    "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)",
+    "Government Accountability - (Policy transparency, Online Safety Act concerns, government oversight)",
+    "Cost of Living - (Food prices, energy bills, financial pressures)",
+    "Healthcare - (NHS staff shortages, NHS waiting times, access to services)",
+    "Social Care & Welfare - (Access delays, quality concerns, funding shortfalls)",
+    "Education - (Teacher shortages, funding pressure, youth services)",
+    "Housing - (Affordability, homelessness, social housing)",
+    "Jobs & Economy - (Employment opportunities, local economy stagnation)",
+    "Community & Cohesion - (Immigration, integration issues, local service strain)",
+    "Crime & Safety - (Local crime, policing, community safety)",
+    "Public Transport & Roads - (Transport access, road maintenance, reliability)",
+    "Environment - (Sustainability, pollution, green spaces)",
+    "Other - (Specify your own issue)",
   ];
 
   const scriptedPrompts: { [key: string]: { problem: string; solution: string }[] } = {
-    "Government Overreach – (Free speech restrictions, arrests for criticizing policies, hate speech laws)": [
+    "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)": [
       {
         problem: "I’m concerned about arrests for peaceful protests under hate speech laws.",
         solution: "Advocate for clearer hate speech definitions to protect free expression.",
@@ -143,7 +143,7 @@ export default function Home() {
         solution: "Support guidelines to limit police action to actual threats, not opinions.",
       },
     ],
-    "Government Accountability – (Policy transparency, Online Safety Act concerns, government oversight)": [
+    "Government Accountability - (Policy transparency, Online Safety Act concerns, government oversight)": [
       {
         problem: "The Online Safety Act’s impact isn’t clear to constituents.",
         solution: "Press for public reports on how policies affect our community.",
@@ -157,7 +157,7 @@ export default function Home() {
         solution: "Advocate for stronger independent reviews of policy effects.",
       },
     ],
-    "Cost of Living – (Food prices, energy bills, financial pressures)": [
+    "Cost of Living - (Food prices, energy bills, financial pressures)": [
       {
         problem: "Energy bills are soaring, straining local families.",
         solution: "Support energy cost subsidies for low-income households.",
@@ -171,7 +171,7 @@ export default function Home() {
         solution: "Advocate for rent caps or more affordable housing options.",
       },
     ],
-    "Healthcare – (NHS staff shortages, NHS waiting times, access to services)": [
+    "Healthcare - (NHS staff shortages, NHS waiting times, access to services)": [
       {
         problem: "NHS waiting times are delaying care for local patients.",
         solution: "Increase funding to hire more healthcare staff locally.",
@@ -185,7 +185,7 @@ export default function Home() {
         solution: "Push for mobile clinics or better transport to healthcare.",
       },
     ],
-    "Social Care & Welfare – (Access delays, quality concerns, funding shortfalls)": [
+    "Social Care & Welfare - (Access delays, quality concerns, funding shortfalls)": [
       {
         problem: "Elderly locals wait months for care assessments.",
         solution: "Advocate for more funding to speed up care access.",
@@ -199,7 +199,7 @@ export default function Home() {
         solution: "Press for faster processing of welfare claims locally.",
       },
     ],
-    "Education – (Teacher shortages, funding pressure, youth services)": [
+    "Education - (Teacher shortages, funding pressure, youth services)": [
       {
         problem: "Teacher shortages are disrupting our schools.",
         solution: "Support recruitment bonuses to bring in more educators.",
@@ -213,7 +213,7 @@ export default function Home() {
         solution: "Advocate for restoring local youth programs.",
       },
     ],
-    "Housing – (Affordability, homelessness, social housing)": [
+    "Housing - (Affordability, homelessness, social housing)": [
       {
         problem: "Rents are unaffordable for many in our constituency.",
         solution: "Support building more social housing locally.",
@@ -227,7 +227,7 @@ export default function Home() {
         solution: "Advocate for affordable homeownership schemes.",
       },
     ],
-    "Jobs & Economy – (Employment opportunities, local economy stagnation)": [
+    "Jobs & Economy - (Employment opportunities, local economy stagnation)": [
       {
         problem: "Job openings are scarce in our area.",
         solution: "Encourage investment in local job creation programs.",
@@ -241,7 +241,7 @@ export default function Home() {
         solution: "Push for training schemes to keep talent here.",
       },
     ],
-    "Community & Cohesion – (Immigration, integration issues, local service strain)": [
+    "Community & Cohesion - (Immigration, integration issues, local service strain)": [
       {
         problem: "Service strain is causing tension in our community.",
         solution: "Fund expanded services to match population needs.",
@@ -255,7 +255,7 @@ export default function Home() {
         solution: "Advocate for more translation services in our area.",
       },
     ],
-    "Crime & Safety – (Local crime, policing, community safety)": [
+    "Crime & Safety - (Local crime, policing, community safety)": [
       {
         problem: "Petty crime is rising in our neighborhoods.",
         solution: "Support more police patrols in high-crime areas.",
@@ -269,7 +269,7 @@ export default function Home() {
         solution: "Advocate for better street lighting locally.",
       },
     ],
-    "Public Transport & Roads – (Transport access, road maintenance, reliability)": [
+    "Public Transport & Roads - (Transport access, road maintenance, reliability)": [
       {
         problem: "Buses are unreliable, stranding commuters.",
         solution: "Press for improved bus schedules and funding.",
@@ -283,7 +283,7 @@ export default function Home() {
         solution: "Advocate for better rural bus routes.",
       },
     ],
-    "Environment – (Sustainability, pollution, green spaces)": [
+    "Environment - (Sustainability, pollution, green spaces)": [
       {
         problem: "Air pollution is worsening local health.",
         solution: "Promote stricter emissions controls in our area.",
@@ -301,31 +301,31 @@ export default function Home() {
 
   const getProblemPlaceholder = (issue: string) => {
     switch (issue) {
-      case "Government Overreach – (Free speech restrictions, arrests for criticizing policies, hate speech laws)":
+      case "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)":
         return "e.g., I’ve heard of people being arrested for social media posts criticizing government policies.";
-      case "Government Accountability – (Policy transparency, Online Safety Act concerns, government oversight)":
+      case "Government Accountability - (Policy transparency, Online Safety Act concerns, government oversight)":
         return "e.g., I’m concerned about lack of transparency in government policies like the Online Safety Act.";
-      case "Cost of Living – (Food prices, energy bills, financial pressures)":
+      case "Cost of Living - (Food prices, energy bills, financial pressures)":
         return "e.g., My energy bills have doubled this year.";
-      case "Healthcare – (NHS staff shortages, NHS waiting times, access to services)":
+      case "Healthcare - (NHS staff shortages, NHS waiting times, access to services)":
         return "e.g., I’ve waited 6 months for an NHS appointment.";
-      case "Social Care & Welfare – (Access delays, quality concerns, funding shortfalls)":
+      case "Social Care & Welfare - (Access delays, quality concerns, funding shortfalls)":
         return "e.g., My elderly parent waits weeks for care support.";
-      case "Education – (Teacher shortages, funding pressure, youth services)":
+      case "Education - (Teacher shortages, funding pressure, youth services)":
         return "e.g., My child’s school lacks enough teachers for core subjects.";
-      case "Housing – (Affordability, homelessness, social housing)":
+      case "Housing - (Affordability, homelessness, social housing)":
         return "e.g., Rents in my area are unaffordable for my income.";
-      case "Jobs & Economy – (Employment opportunities, local economy stagnation)":
+      case "Jobs & Economy - (Employment opportunities, local economy stagnation)":
         return "e.g., There are few job openings in my town.";
-      case "Community & Cohesion – (Immigration, integration issues, local service strain)":
+      case "Community & Cohesion - (Immigration, integration issues, local service strain)":
         return "e.g., Local services are overstretched due to population growth.";
-      case "Crime & Safety – (Local crime, policing, community safety)":
+      case "Crime & Safety - (Local crime, policing, community safety)":
         return "e.g., Burglaries have increased in my neighborhood.";
-      case "Public Transport & Roads – (Transport access, road maintenance, reliability)":
+      case "Public Transport & Roads - (Transport access, road maintenance, reliability)":
         return "e.g., Buses in my area are unreliable and often late.";
-      case "Environment – (Sustainability, pollution, green spaces)":
+      case "Environment - (Sustainability, pollution, green spaces)":
         return "e.g., Air pollution near my home is affecting my health.";
-      case "Other – (Specify your own issue)":
+      case "Other - (Specify your own issue)":
         return "e.g., Describe your specific concern here.";
       default:
         return "Describe the problem";
@@ -334,31 +334,31 @@ export default function Home() {
 
   const getSolutionPlaceholder = (issue: string) => {
     switch (issue) {
-      case "Government Overreach – (Free speech restrictions, arrests for criticizing policies, hate speech laws)":
+      case "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)":
         return "e.g., Advocate for clearer definitions of hate speech to protect free expression.";
-      case "Government Accountability – (Policy transparency, Online Safety Act concerns, government oversight)":
+      case "Government Accountability - (Policy transparency, Online Safety Act concerns, government oversight)":
         return "e.g., Push for greater transparency in government policy-making.";
-      case "Cost of Living – (Food prices, energy bills, financial pressures)":
+      case "Cost of Living - (Food prices, energy bills, financial pressures)":
         return "e.g., Subsidize energy costs for low-income households.";
-      case "Healthcare – (NHS staff shortages, NHS waiting times, access to services)":
+      case "Healthcare - (NHS staff shortages, NHS waiting times, access to services)":
         return "e.g., Increase funding for local NHS staff recruitment.";
-      case "Social Care & Welfare – (Access delays, quality concerns, funding shortfalls)":
+      case "Social Care & Welfare - (Access delays, quality concerns, funding shortfalls)":
         return "e.g., Hire more carers to reduce waiting times.";
-      case "Education – (Teacher shortages, funding pressure, youth services)":
+      case "Education - (Teacher shortages, funding pressure, youth services)":
         return "e.g., Offer incentives to attract teachers to our schools.";
-      case "Housing – (Affordability, homelessness, social housing)":
+      case "Housing - (Affordability, homelessness, social housing)":
         return "e.g., Build more affordable homes on unused land.";
-      case "Jobs & Economy – (Employment opportunities, local economy stagnation)":
+      case "Jobs & Economy - (Employment opportunities, local economy stagnation)":
         return "e.g., Support small businesses with tax breaks.";
-      case "Community & Cohesion – (Immigration, integration issues, local service strain)":
+      case "Community & Cohesion - (Immigration, integration issues, local service strain)":
         return "e.g., Fund community programs to ease service demand.";
-      case "Crime & Safety – (Local crime, policing, community safety)":
+      case "Crime & Safety - (Local crime, policing, community safety)":
         return "e.g., Increase police patrols in high-crime areas.";
-      case "Public Transport & Roads – (Transport access, road maintenance, reliability)":
+      case "Public Transport & Roads - (Transport access, road maintenance, reliability)":
         return "e.g., Improve bus schedules and repair potholes.";
-      case "Environment – (Sustainability, pollution, green spaces)":
+      case "Environment - (Sustainability, pollution, green spaces)":
         return "e.g., Enforce stricter emissions rules in our area.";
-      case "Other – (Specify your own issue)":
+      case "Other - (Specify your own issue)":
         return "e.g., Propose your own solution here.";
       default:
         return "Propose a solution";
@@ -370,7 +370,7 @@ export default function Home() {
 
   useEffect(() => {
     if (mpDetails && formData.issue && formData.problem && formData.consent) {
-      const issueText = formData.issue === "Other – (Specify your own issue)" && formData.customIssue ? formData.customIssue : formData.issue.split(" – ")[0];
+      const issueText = formData.issue === "Other - (Specify your own issue)" && formData.customIssue ? formData.customIssue : formData.issue.split(" - ")[0];
       const generatedLetter = `
 Dear ${mpDetails.name ?? "MP"},
 
@@ -468,7 +468,7 @@ Email: ${formData.userEmail}
   };
 
   const handleGetSuggestion = () => {
-    if (!formData.issue || formData.issue === "Other – (Specify your own issue)") {
+    if (!formData.issue || formData.issue === "Other - (Specify your own issue)") {
       setError("Please select an issue first (other than 'Other').");
       return;
     }
@@ -783,7 +783,7 @@ Yours sincerely,
       <Head>
         <meta property="og:title" content="DM My MP - Beta" />
         <meta property="og:description" content="I wrote to my MP in minutes, you can too. Try it ➡️" />
-        <meta property="og:url" content="https://dmmymp.com" /> {/* Update to your live domain after deployment */}
+        <meta property="og:url" content="https://dmmymp.com" />
         <meta property="og:type" content="website" />
       </Head>
       <div className="container mx-auto p-6 bg-white dark:bg-gray-900">
@@ -811,7 +811,7 @@ Yours sincerely,
               />
               <div className="mb-4">
                 <ReCAPTCHA
-                  sitekey="6LfOXegqAAAAAKICAvPf0aOqWKmzefenTTnBT-JJ" // Your site key
+                  sitekey="6LfOXegqAAAAAKICAvPf0aOqWKmzefenTTnBT-JJ"
                   onChange={handleCaptchaChange}
                 />
               </div>
@@ -826,9 +826,9 @@ Yours sincerely,
             </div>
             <footer className="mt-8 text-center text-gray-600 dark:text-gray-300">
               <p>
-                <a href="/terms-of-use" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Terms of Use</a> | 
-                <a href="/privacy-policy" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Privacy Policy</a> | 
-                <a href="/free-speech" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Your Free Speech Rights</a>
+                <Link href="/terms-of-use" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Terms of Use</Link> |{" "}
+                <Link href="/privacy-policy" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Privacy Policy</Link> |{" "}
+                <Link href="/free-speech" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Your Free Speech Rights</Link>
               </p>
             </footer>
           </div>
@@ -929,7 +929,7 @@ Yours sincerely,
                     ))}
                   </select>
                 </div>
-                {formData.issue === "Other – (Specify your own issue)" && (
+                {formData.issue === "Other - (Specify your own issue)" && (
                   <InputField
                     label="Specify Your Issue"
                     value={formData.customIssue || ""}
@@ -943,7 +943,7 @@ Yours sincerely,
                   <button
                     onClick={handleGetSuggestion}
                     className="w-2/3 bg-yellow-500 text-black p-2 rounded hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:text-white"
-                    disabled={!formData.issue || formData.issue === "Other – (Specify your own issue)"}
+                    disabled={!formData.issue || formData.issue === "Other - (Specify your own issue)"}
                   >
                     Get Suggestion of a Common Concern
                   </button>
@@ -1098,9 +1098,9 @@ Yours sincerely,
             {error && <p className="text-red-500 mt-4 text-center dark:text-red-400">{error}</p>}
             <footer className="mt-8 text-center text-gray-600 dark:text-gray-300">
               <p>
-                <a href="/terms-of-use" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Terms of Use</a> | 
-                <a href="/privacy-policy" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Privacy Policy</a> | 
-                <a href="/free-speech" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Your Free Speech Rights</a>
+                <Link href="/terms-of-use" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Terms of Use</Link> |{" "}
+                <Link href="/privacy-policy" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Privacy Policy</Link> |{" "}
+                <Link href="/free-speech" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">Your Free Speech Rights</Link>
               </p>
             </footer>
           </div>
