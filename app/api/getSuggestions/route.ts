@@ -7,7 +7,7 @@ function getRandomItem<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const { issue, constituency } = await req.json();
 
   if (!issue || !constituency) {
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     });
   } else {
     // For all other issues (local), use the Mistral AI suggestions via Python script
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const scriptPath = path.join(process.cwd(), "get_suggestions.py");
 
       const pythonProcess = spawn("python3", [scriptPath, issue, constituency]);
@@ -62,10 +62,13 @@ export async function POST(req: NextRequest) {
 
       pythonProcess.stderr.on("data", (err) => {
         console.error("Python error:", err.toString());
+        reject(new Error("Python script error"));
       });
 
-      pythonProcess.on("close", () => {
-        if (!data.trim()) {
+      pythonProcess.on("close", (code) => {
+        if (code !== 0) {
+          reject(new Error(`Python script exited with code ${code}`));
+        } else if (!data.trim()) {
           resolve(NextResponse.json({ error: "No suggestions generated." }, { status: 500 }));
         } else {
           const [problem, solution] = data.split("Solution:").map((str) => str.trim());

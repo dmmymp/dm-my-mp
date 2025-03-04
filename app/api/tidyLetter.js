@@ -1,4 +1,3 @@
-// app/api/tidyLetter/route.js
 import { exec } from "child_process";
 import path from "path";
 
@@ -15,7 +14,7 @@ export async function POST(req) {
     const command = `python3 "${scriptPath}" ${safeLetter}`;
 
     return new Promise((resolve) => {
-      exec(command, (error, stdout, stderr) => {
+      exec(command, (error, stdout) => { // Removed stderr from callback
         if (error) {
           console.error("Execution error:", error);
           return resolve(new Response(JSON.stringify({ error: "Failed to tidy the letter." }), { status: 500 }));

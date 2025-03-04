@@ -37,6 +37,14 @@ const InputField = ({
   type = "text",
   required = false,
   onKeyDown,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  type?: string;
+  required?: boolean;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }) => (
   <div className="mb-4">
     <label className="block text-black dark:text-white mb-1">{label}</label>
@@ -52,7 +60,15 @@ const InputField = ({
   </div>
 );
 
-const TextAreaField = ({ label, value, onChange, placeholder, required = false, className = "", helpText = "" }) => (
+const TextAreaField = ({ label, value, onChange, placeholder, required = false, className = "", helpText = "" }: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  required?: boolean;
+  className?: string;
+  helpText?: string;
+}) => (
   <div className="mb-4">
     <label className="block text-black dark:text-white mb-1">{label}</label>
     <textarea
@@ -71,11 +87,11 @@ const ProgressIndicator = ({ currentStep }: { currentStep: number }) => (
     <span className={`mr-2 ${currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       1. Find MP
     </span>
-    <span className="mr-2 dark:text-gray-300">></span>
+    <span className="mr-2 dark:text-gray-300"></span>
     <span className={`mr-2 ${currentStep >= 2 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       2. Write Message
     </span>
-    <span className="mr-2 dark:text-gray-300">></span>
+    <span className="mr-2 dark:text-gray-300"></span>
     <span className={`${currentStep >= 3 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       3. Send
     </span>
@@ -106,7 +122,6 @@ export default function Home() {
   const [liabilityConsent, setLiabilityConsent] = useState<boolean>(false);
   const [tidyLoading, setTidyLoading] = useState<boolean>(false);
   const [emailSent, setEmailSent] = useState<boolean>(false);
-  const [mpTwitterHandle, setMpTwitterHandle] = useState<string | null>(null);
   const [showLegalReminder, setShowLegalReminder] = useState<boolean>(false);
   const [suggestionIndex, setSuggestionIndex] = useState<number>(0);
   const [captchaVerified, setCaptchaVerified] = useState<boolean>(false);
@@ -394,10 +409,6 @@ Email: ${formData.userEmail}
     }
   }, [mpDetails, formData]);
 
-  const fetchMpTwitterHandle = async (mpName: string) => {
-    setMpTwitterHandle(null);
-  };
-
   const handleSearch = async () => {
     const postcodeRegex = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
     if (!formData.postcode.trim() || !postcodeRegex.test(formData.postcode.trim())) {
@@ -445,7 +456,6 @@ Email: ${formData.userEmail}
           setError("No MP found for this postcode. Please recheck your entry and try again.");
         } else {
           setMpDetails(parsedDetails);
-          setMpTwitterHandle(null);
         }
       }
     } catch (err) {
@@ -766,10 +776,6 @@ Yours sincerely,
 
   const handleEditedTidiedLetterChange = (value: string) => {
     setEditedTidiedLetter(value);
-  };
-
-  const trackEvent = (eventName: string, data: { constituency?: string; issue?: string; category?: string }) => {
-    console.log(`Tracking event: ${eventName}`, data);
   };
 
   const getCurrentStep = () => {
