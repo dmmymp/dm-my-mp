@@ -387,21 +387,21 @@ export default function Home() {
     if (mpDetails && formData.issue && formData.problem && formData.consent) {
       const issueText = formData.issue === "Other - (Specify your own issue)" && formData.customIssue ? formData.customIssue : formData.issue.split(" - ")[0];
       const generatedLetter = `
-Dear ${mpDetails.name ?? "MP"},
-
-I am writing to express my concern regarding the issue of ${issueText.toLowerCase()} in our constituency of ${mpDetails.constituency ?? "your constituency"}.
-
-The specific problem is: ${formData.problem}${formData.personalProblem ? `\n\nMy personal experience: ${formData.personalProblem}` : ""}
-
-${formData.solution ? `I believe a possible solution could be: ${formData.solution}${formData.personalSolution ? `\n\nMy suggestion based on personal experience: ${formData.personalSolution}` : ""}` : ""}
-
-I appreciate your attention to this matter and look forward to your response.
-
-Yours sincerely,
-${formData.fullName}
-${formData.address}
-${formData.postcode.toUpperCase()}
-Email: ${formData.userEmail}
+  Dear ${mpDetails.name ?? "MP"},
+  
+  I am writing to express my concern regarding the issue of ${issueText.toLowerCase()} in our constituency of ${mpDetails.constituency ?? "your constituency"}.
+  
+  The specific problem is: ${formData.problem}${formData.personalProblem ? `\n\nMy personal experience: ${formData.personalProblem}` : ""}
+  
+  ${formData.solution ? `I believe a possible solution could be: ${formData.solution}${formData.personalSolution ? `\n\nMy suggestion based on personal experience: ${formData.personalSolution}` : ""}` : ""}
+  
+  I appreciate your attention to this matter and look forward to your response.
+  
+  Yours sincerely,
+  ${formData.fullName}
+  ${formData.address}
+  ${formData.postcode.toUpperCase()}
+  Email: ${formData.userEmail}
       `.trim();
       setLetter(generatedLetter);
     } else {
@@ -551,51 +551,52 @@ Email: ${formData.userEmail}
 
   const handleShareOnTwitter = async () => {
     if (!tidiedLetterRef.current || !tidiedLetter) return;
-
+  
     const letterToSanitize = isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter;
     console.log("Current Tidied Message State:", letterToSanitize);
-
+  
     const sanitizedLetterLines = letterToSanitize.split("\n");
     let bodyEndIndex = sanitizedLetterLines.length;
     for (let i = 1; i < sanitizedLetterLines.length; i++) {
       const line = sanitizedLetterLines[i].trim().toLowerCase();
       if (
-        line.match(/^(sincerely|yours|flat|email)/i) ||
+        line.match(/^(yours sincerely,|sincerely,)/i) ||
         line.includes(formData.fullName.toLowerCase()) ||
         line.includes(formData.address.toLowerCase()) ||
         line.includes(formData.userEmail.toLowerCase()) ||
+        line.includes(formData.postcode.toLowerCase()) ||
         line.startsWith("i appreciate your attention to this matter and look forward to")
       ) {
         bodyEndIndex = i;
         break;
       }
     }
-
+  
     if (bodyEndIndex <= 1) {
       throw new Error("Could not determine the end of the message body in the tidied message.");
     }
-
+  
     const bodyLines = sanitizedLetterLines.slice(1, bodyEndIndex).filter(
       (line) =>
         !line.toLowerCase().startsWith("my personal experience:") &&
         !line.toLowerCase().startsWith("to address this problem,") &&
         !line.toLowerCase().startsWith("i appreciate your attention to this matter and look forward to")
     );
-
+  
     const sanitizedLetter = `
-Dear ${mpDetails?.name ?? "MP"},
-
-${bodyLines.join("\n").trim()}
-
-Yours sincerely,
-[Name omitted]
+  Dear ${mpDetails?.name ?? "MP"},
+  
+  ${bodyLines.join("\n").trim()}
+  
+  Yours sincerely,
+  [Name omitted]
     `.trim();
-
+  
     const originalContent = tidiedLetterRef.current.innerText;
     tidiedLetterRef.current.innerText = sanitizedLetter;
-
+  
     await new Promise((resolve) => setTimeout(resolve, 2500));
-
+  
     let attempts = 0;
     const maxAttempts = 10;
     while (attempts < maxAttempts && tidiedLetterRef.current?.innerText !== sanitizedLetter) {
@@ -603,10 +604,10 @@ Yours sincerely,
       await new Promise((resolve) => setTimeout(resolve, 250));
       attempts++;
     }
-
+  
     console.log("Tidied Message Ref Before Screenshot (Final):", tidiedLetterRef.current?.innerText);
     console.log("Sanitized Message:", sanitizedLetter);
-
+  
     try {
       const canvas = await html2canvas(tidiedLetterRef.current, {
         scale: 2,
@@ -616,7 +617,7 @@ Yours sincerely,
         ignoreElements: (element) => element.tagName === "SCRIPT" || element.tagName === "STYLE",
       });
       const imageDataUrl = canvas.toDataURL("image/png");
-
+  
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = canvas.width;
       tempCanvas.height = canvas.height;
@@ -625,7 +626,7 @@ Yours sincerely,
         tempContext.drawImage(canvas, 0, 0);
       }
       const jpegImageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.9);
-
+  
       let blob;
       try {
         blob = await fetch(imageDataUrl).then((res) => res.blob());
@@ -633,14 +634,14 @@ Yours sincerely,
         console.error("PNG copy failed, trying JPEG:", pngError);
         blob = await fetch(jpegImageDataUrl).then((res) => res.blob());
       }
-
+  
       await navigator.clipboard.write([
         new ClipboardItem({
           "image/png": blob,
         }),
       ]);
       alert("Screenshot of the tidied message copied to clipboard! Paste it into your Twitter tweet (use Ctrl+V or Cmd+V).");
-
+  
       const tweetText = "I wrote to my MP in minutes, you can too. Try it ➡️";
       const url = window.location.href;
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(url)}`;
@@ -648,7 +649,7 @@ Yours sincerely,
     } catch (err) {
       console.error("Failed to generate screenshot or copy to clipboard:", err);
       setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
-
+  
       const tweetText = "I wrote to my MP in minutes, you can too. Try it ➡️";
       const url = window.location.href;
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(url)}`;
@@ -658,112 +659,113 @@ Yours sincerely,
     }
   };
 
-  const handleShareOnFacebook = async () => {
-    if (!tidiedLetterRef.current || !tidiedLetter) return;
+const handleShareOnFacebook = async () => {
+  if (!tidiedLetterRef.current || !tidiedLetter) return;
 
-    const letterToSanitize = isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter;
-    console.log("Current Tidied Message State for Facebook:", letterToSanitize);
+  const letterToSanitize = isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter;
+  console.log("Current Tidied Message State for Facebook:", letterToSanitize);
 
-    const sanitizedLetterLines = letterToSanitize.split("\n");
-    let bodyEndIndex = sanitizedLetterLines.length;
-    for (let i = 1; i < sanitizedLetterLines.length; i++) {
-      const line = sanitizedLetterLines[i].trim().toLowerCase();
-      if (
-        line.match(/^(sincerely|yours|flat|email)/i) ||
-        line.includes(formData.fullName.toLowerCase()) ||
-        line.includes(formData.address.toLowerCase()) ||
-        line.includes(formData.userEmail.toLowerCase()) ||
-        line.startsWith("i appreciate your attention to this matter and look forward to")
-      ) {
-        bodyEndIndex = i;
-        break;
-      }
+  const sanitizedLetterLines = letterToSanitize.split("\n");
+  let bodyEndIndex = sanitizedLetterLines.length;
+  for (let i = 1; i < sanitizedLetterLines.length; i++) {
+    const line = sanitizedLetterLines[i].trim().toLowerCase();
+    if (
+      line.match(/^(yours sincerely,|sincerely,)/i) ||
+      line.includes(formData.fullName.toLowerCase()) ||
+      line.includes(formData.address.toLowerCase()) ||
+      line.includes(formData.userEmail.toLowerCase()) ||
+      line.includes(formData.postcode.toLowerCase()) ||
+      line.startsWith("i appreciate your attention to this matter and look forward to")
+    ) {
+      bodyEndIndex = i;
+      break;
     }
+  }
 
-    if (bodyEndIndex <= 1) {
-      throw new Error("Could not determine the end of the message body in the tidied message.");
-    }
+  if (bodyEndIndex <= 1) {
+    throw new Error("Could not determine the end of the message body in the tidied message.");
+  }
 
-    const bodyLines = sanitizedLetterLines.slice(1, bodyEndIndex).filter(
-      (line) =>
-        !line.toLowerCase().startsWith("my personal experience:") &&
-        !line.toLowerCase().startsWith("to address this problem,") &&
-        !line.toLowerCase().startsWith("i appreciate your attention to this matter and look forward to")
-    );
+  const bodyLines = sanitizedLetterLines.slice(1, bodyEndIndex).filter(
+    (line) =>
+      !line.toLowerCase().startsWith("my personal experience:") &&
+      !line.toLowerCase().startsWith("to address this problem,") &&
+      !line.toLowerCase().startsWith("i appreciate your attention to this matter and look forward to")
+  );
 
-    const sanitizedLetter = `
+  const sanitizedLetter = `
 Dear ${mpDetails?.name ?? "MP"},
 
 ${bodyLines.join("\n").trim()}
 
 Yours sincerely,
 [Name omitted]
-    `.trim();
+  `.trim();
 
-    const originalContent = tidiedLetterRef.current.innerText;
-    tidiedLetterRef.current.innerText = sanitizedLetter;
+  const originalContent = tidiedLetterRef.current.innerText;
+  tidiedLetterRef.current.innerText = sanitizedLetter;
 
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+  await new Promise((resolve) => setTimeout(resolve, 2500));
 
-    let attempts = 0;
-    const maxAttempts = 10;
-    while (attempts < maxAttempts && tidiedLetterRef.current?.innerText !== sanitizedLetter) {
-      console.log(`Attempt ${attempts + 1}: Tidied Message Ref`, tidiedLetterRef.current?.innerText);
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      attempts++;
+  let attempts = 0;
+  const maxAttempts = 10;
+  while (attempts < maxAttempts && tidiedLetterRef.current?.innerText !== sanitizedLetter) {
+    console.log(`Attempt ${attempts + 1}: Tidied Message Ref`, tidiedLetterRef.current?.innerText);
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    attempts++;
+  }
+
+  console.log("Tidied Message Ref Before Screenshot (Final):", tidiedLetterRef.current?.innerText);
+  console.log("Sanitized Message for Facebook:", sanitizedLetter);
+
+  try {
+    const canvas = await html2canvas(tidiedLetterRef.current, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      foreignObjectRendering: false,
+      ignoreElements: (element) => element.tagName === "SCRIPT" || element.tagName === "STYLE",
+    });
+    const imageDataUrl = canvas.toDataURL("image/png");
+
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const tempContext = tempCanvas.getContext("2d");
+    if (tempContext) {
+      tempContext.drawImage(canvas, 0, 0);
     }
+    const jpegImageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.9);
 
-    console.log("Tidied Message Ref Before Screenshot (Final):", tidiedLetterRef.current?.innerText);
-    console.log("Sanitized Message for Facebook:", sanitizedLetter);
-
+    let blob;
     try {
-      const canvas = await html2canvas(tidiedLetterRef.current, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        foreignObjectRendering: false,
-        ignoreElements: (element) => element.tagName === "SCRIPT" || element.tagName === "STYLE",
-      });
-      const imageDataUrl = canvas.toDataURL("image/png");
-
-      const tempCanvas = document.createElement("canvas");
-      tempCanvas.width = canvas.width;
-      tempCanvas.height = canvas.height;
-      const tempContext = tempCanvas.getContext("2d");
-      if (tempContext) {
-        tempContext.drawImage(canvas, 0, 0);
-      }
-      const jpegImageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.9);
-
-      let blob;
-      try {
-        blob = await fetch(imageDataUrl).then((res) => res.blob());
-      } catch (pngError) {
-        console.error("PNG copy failed, trying JPEG:", pngError);
-        blob = await fetch(jpegImageDataUrl).then((res) => res.blob());
-      }
-
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          "image/png": blob,
-        }),
-      ]);
-      alert("Screenshot of the tidied message copied to clipboard! Paste it into your Facebook post (use Ctrl+V or Cmd+V).");
-
-      const url = window.location.href;
-      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-      window.open(facebookUrl, "_blank", "width=600,height=400");
-    } catch (err) {
-      console.error("Failed to generate screenshot or copy to clipboard:", err);
-      setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
-
-      const url = window.location.href;
-      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-      window.open(facebookUrl, "_blank", "width=600,height=400");
-    } finally {
-      tidiedLetterRef.current.innerText = originalContent;
+      blob = await fetch(imageDataUrl).then((res) => res.blob());
+    } catch (pngError) {
+      console.error("PNG copy failed, trying JPEG:", pngError);
+      blob = await fetch(jpegImageDataUrl).then((res) => res.blob());
     }
-  };
+
+    await navigator.clipboard.write([
+      new ClipboardItem({
+        "image/png": blob,
+      }),
+    ]);
+    alert("Screenshot of the tidied message copied to clipboard! Paste it into your Facebook post (use Ctrl+V or Cmd+V).");
+
+    const url = window.location.href;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, "_blank", "width=600,height=400");
+  } catch (err) {
+    console.error("Failed to generate screenshot or copy to clipboard:", err);
+    setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
+
+    const url = window.location.href;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, "_blank", "width=600,height=400");
+  } finally {
+    tidiedLetterRef.current.innerText = originalContent;
+  }
+};
 
   const handleEditToggle = () => {
     setIsEditingTidiedLetter(!isEditingTidiedLetter);
