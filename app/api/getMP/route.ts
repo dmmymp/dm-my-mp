@@ -1,37 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { spawn } from "child_process";
+import { promises as fs } from "fs";
 import path from "path";
+import { parse } from "csv-parse/sync";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url);
-  const postcode = searchParams.get("postcode");
+  const postcode = searchParams.get("postcode")?.toUpperCase().replace(/\s/g, "");
 
   if (!postcode) {
     return NextResponse.json({ error: "No postcode provided" }, { status: 400 });
   }
 
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(process.cwd(), "gpt4all_script.py");
-    const pythonProcess = spawn("python3", [scriptPath, postcode]);
+  try {
+    const filePath = path.join(process.cwd(), "app/data/mp_data.csv");
+    const fileContent = await fs.readFile(filePath, "utf-8");
+    const records = parse(fileContent, { columns: true, skip_empty_lines: true });
 
-    let data = "";
-    pythonProcess.stdout.on("data", (chunk) => {
-      data += chunk.toString();
-    });
+    const mpData = records.find((record: any) => record.postcode === postcode);
 
-    pythonProcess.stderr.on("data", (err) => {
-      console.error("Python error:", err.toString());
-      reject(new Error("Python script error")); // Reject on error
-    });
+    if (!mpData) {
+      return NextResponse.json({ error: "No MP found for this postcode" }, { status: 404 });
+    }
 
-    pythonProcess.on("close", (code) => {
-      if (code !== 0) {
-        reject(new Error(`Python script exited with code ${code}`));
-      } else if (!data.trim()) {
-        resolve(NextResponse.json({ error: "No data received from Python script" }, { status: 500 }));
-      } else {
-        resolve(NextResponse.json({ mpDetails: data.trim() }));
-      }
-    });
-  });
+    return NextResponse.json({ mpDetails: mpData });
+  } catch (error) {
+    console.error("Error reading MP data:", error);
+    return NextResponse.json({ error: "Failed to fetch MP data" }, { status: 500 });
+  }
 }
