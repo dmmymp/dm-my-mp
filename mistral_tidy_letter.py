@@ -27,6 +27,8 @@ def main():
         prompt = (
             f"Improve the following letter to be formal, concise, and professional. "
             f"If it is a local MP issue, format the letter to concern the addressee directly as the local MP. "
+            f"Do not include address details in letter body"
+            f"Ensure placeholder name, address, postcode, and email are included at the end of the letter"
             f"Preserve placeholders like [Your Name], [Your Address], and [Your Email] for later replacement, and keep all key details intact.\n\n"
             f"---\n{letter}\n---\n\n"
             "Tidied Letter:"
