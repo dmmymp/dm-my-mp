@@ -13,18 +13,18 @@ export async function POST(req: NextRequest) {
 
     const prompt = `Rephrase the following letter to be concise, polite, and professional, suitable for addressing a Member of Parliament. Include the constituent's name, address, and email at the top, followed by a formal salutation (e.g., "Dear [MP's Name],"). Keep the letter under 300 words and end with a closing like "Yours sincerely, [Name]".
 
-Constituent Details:
-Name: ${name}
-Address: ${address}
-Email: ${email}
+    Constituent Details:
+    Name: ${name}
+    Address: ${address}
+    Email: ${email}
 
-Original Letter:
-${letter}
+    Original Letter:
+    ${letter}
 
-Tidied Letter (output between ===BEGIN=== and ===END===):
-===BEGIN===
-[Tidied letter here]
-===END===`;
+    Tidied Letter (output between ===BEGIN=== and ===END===):
+    ===BEGIN===
+    [Tidied letter here]
+    ===END===`;
 
     const response = await fetch(
       "https://api-inference.huggingface.co/models/t5-base",
@@ -61,8 +61,10 @@ Tidied Letter (output between ===BEGIN=== and ===END===):
     }
 
     return NextResponse.json({ tidiedLetter });
-  } catch (err) {
-    console.error("API Error:", err.message || err);
+  } catch (err: unknown) {
+    // Narrow the type of err to Error or handle as unknown
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("API Error:", errorMessage);
     return NextResponse.json(
       { error: "An unexpected error occurred." },
       { status: 500 }
