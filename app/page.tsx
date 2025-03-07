@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import html2canvas from "html2canvas";
 import Link from "next/link";
 import Head from "next/head";
-import ReCAPTCHA from "react-google-recaptcha";
 
 type MPDetails = {
   name: string;
@@ -60,7 +59,15 @@ const InputField = ({
   </div>
 );
 
-const TextAreaField = ({ label, value, onChange, placeholder, required = false, className = "", helpText = "" }: {
+const TextAreaField = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required = false,
+  className = "",
+  helpText = "",
+}: {
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -87,11 +94,11 @@ const ProgressIndicator = ({ currentStep }: { currentStep: number }) => (
     <span className={`mr-2 ${currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       1. Find MP
     </span>
-    <span className="mr-2 dark:text-gray-300"></span>
+    <span className="mr-2 dark:text-gray-300">{">"}</span> {/* Changed > to {">"} */}
     <span className={`mr-2 ${currentStep >= 2 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       2. Write Message
     </span>
-    <span className="mr-2 dark:text-gray-300"></span>
+    <span className="mr-2 dark:text-gray-300">{">"}</span> {/* Changed > to {">"} */}
     <span className={`${currentStep >= 3 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       3. Send
     </span>
@@ -124,7 +131,6 @@ export default function Home() {
   const [emailSent, setEmailSent] = useState<boolean>(false);
   const [showLegalReminder, setShowLegalReminder] = useState<boolean>(false);
   const [suggestionIndex, setSuggestionIndex] = useState<number>(0);
-  const [captchaVerified, setCaptchaVerified] = useState<boolean>(false);
   const tidiedLetterRef = useRef<HTMLPreElement | HTMLTextAreaElement>(null);
 
   const issueOptions = [
@@ -387,21 +393,21 @@ export default function Home() {
     if (mpDetails && formData.issue && formData.problem && formData.consent) {
       const issueText = formData.issue === "Other - (Specify your own issue)" && formData.customIssue ? formData.customIssue : formData.issue.split(" - ")[0];
       const generatedLetter = `
-  Dear ${mpDetails.name ?? "MP"},
-  
-  I am writing to express my concern regarding the issue of ${issueText.toLowerCase()} in our constituency of ${mpDetails.constituency ?? "your constituency"}.
-  
-  The specific problem is: ${formData.problem}${formData.personalProblem ? `\n\nMy personal experience: ${formData.personalProblem}` : ""}
-  
-  ${formData.solution ? `I believe a possible solution could be: ${formData.solution}${formData.personalSolution ? `\n\nMy suggestion based on personal experience: ${formData.personalSolution}` : ""}` : ""}
-  
-  I appreciate your attention to this matter and look forward to your response.
-  
-  Yours sincerely,
-  ${formData.fullName}
-  ${formData.address}
-  ${formData.postcode.toUpperCase()}
-  Email: ${formData.userEmail}
+Dear ${mpDetails.name ?? "MP"},
+
+I am writing to express my concern regarding the issue of ${issueText.toLowerCase()} in our constituency of ${mpDetails.constituency ?? "your constituency"}.
+
+The specific problem is: ${formData.problem}${formData.personalProblem ? `\n\nMy personal experience: ${formData.personalProblem}` : ""}
+
+${formData.solution ? `I believe a possible solution could be: ${formData.solution}${formData.personalSolution ? `\n\nMy suggestion based on personal experience: ${formData.personalSolution}` : ""}` : ""}
+
+I appreciate your attention to this matter and look forward to your response.
+
+Yours sincerely,
+${formData.fullName}
+${formData.address}
+${formData.postcode.toUpperCase()}
+Email: ${formData.userEmail}
       `.trim();
       setLetter(generatedLetter);
     } else {
@@ -413,10 +419,6 @@ export default function Home() {
     const postcodeRegex = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
     if (!formData.postcode.trim() || !postcodeRegex.test(formData.postcode.trim())) {
       setError("Please enter a valid UK postcode (e.g., SW1A 1AA).");
-      return;
-    }
-    if (!captchaVerified) {
-      setError("Please verify you’re not a robot.");
       return;
     }
 
@@ -471,10 +473,6 @@ export default function Home() {
       e.preventDefault();
       handleSearch();
     }
-  };
-
-  const handleCaptchaChange = (value: string | null) => {
-    setCaptchaVerified(!!value);
   };
 
   const handleGetSuggestion = () => {
@@ -551,10 +549,10 @@ export default function Home() {
 
   const handleShareOnTwitter = async () => {
     if (!tidiedLetterRef.current || !tidiedLetter) return;
-  
+
     const letterToSanitize = isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter;
     console.log("Current Tidied Message State:", letterToSanitize);
-  
+
     const sanitizedLetterLines = letterToSanitize.split("\n");
     let bodyEndIndex = sanitizedLetterLines.length;
     for (let i = 1; i < sanitizedLetterLines.length; i++) {
@@ -571,32 +569,32 @@ export default function Home() {
         break;
       }
     }
-  
+
     if (bodyEndIndex <= 1) {
       throw new Error("Could not determine the end of the message body in the tidied message.");
     }
-  
+
     const bodyLines = sanitizedLetterLines.slice(1, bodyEndIndex).filter(
       (line) =>
         !line.toLowerCase().startsWith("my personal experience:") &&
         !line.toLowerCase().startsWith("to address this problem,") &&
         !line.toLowerCase().startsWith("i appreciate your attention to this matter and look forward to")
     );
-  
+
     const sanitizedLetter = `
-  Dear ${mpDetails?.name ?? "MP"},
-  
-  ${bodyLines.join("\n").trim()}
-  
-  Yours sincerely,
-  [Name omitted]
+Dear ${mpDetails?.name ?? "MP"},
+
+${bodyLines.join("\n").trim()}
+
+Yours sincerely,
+[Name omitted]
     `.trim();
-  
+
     const originalContent = tidiedLetterRef.current.innerText;
     tidiedLetterRef.current.innerText = sanitizedLetter;
-  
+
     await new Promise((resolve) => setTimeout(resolve, 2500));
-  
+
     let attempts = 0;
     const maxAttempts = 10;
     while (attempts < maxAttempts && tidiedLetterRef.current?.innerText !== sanitizedLetter) {
@@ -604,10 +602,10 @@ export default function Home() {
       await new Promise((resolve) => setTimeout(resolve, 250));
       attempts++;
     }
-  
+
     console.log("Tidied Message Ref Before Screenshot (Final):", tidiedLetterRef.current?.innerText);
     console.log("Sanitized Message:", sanitizedLetter);
-  
+
     try {
       const canvas = await html2canvas(tidiedLetterRef.current, {
         scale: 2,
@@ -617,7 +615,7 @@ export default function Home() {
         ignoreElements: (element) => element.tagName === "SCRIPT" || element.tagName === "STYLE",
       });
       const imageDataUrl = canvas.toDataURL("image/png");
-  
+
       const tempCanvas = document.createElement("canvas");
       tempCanvas.width = canvas.width;
       tempCanvas.height = canvas.height;
@@ -626,7 +624,7 @@ export default function Home() {
         tempContext.drawImage(canvas, 0, 0);
       }
       const jpegImageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.9);
-  
+
       let blob;
       try {
         blob = await fetch(imageDataUrl).then((res) => res.blob());
@@ -634,14 +632,14 @@ export default function Home() {
         console.error("PNG copy failed, trying JPEG:", pngError);
         blob = await fetch(jpegImageDataUrl).then((res) => res.blob());
       }
-  
+
       await navigator.clipboard.write([
         new ClipboardItem({
           "image/png": blob,
         }),
       ]);
       alert("Screenshot of the tidied message copied to clipboard! Paste it into your Twitter tweet (use Ctrl+V or Cmd+V).");
-  
+
       const tweetText = "I wrote to my MP in minutes, you can too. Try it ➡️";
       const url = window.location.href;
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(url)}`;
@@ -649,7 +647,7 @@ export default function Home() {
     } catch (err) {
       console.error("Failed to generate screenshot or copy to clipboard:", err);
       setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
-  
+
       const tweetText = "I wrote to my MP in minutes, you can too. Try it ➡️";
       const url = window.location.href;
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(url)}`;
@@ -659,113 +657,113 @@ export default function Home() {
     }
   };
 
-const handleShareOnFacebook = async () => {
-  if (!tidiedLetterRef.current || !tidiedLetter) return;
+  const handleShareOnFacebook = async () => {
+    if (!tidiedLetterRef.current || !tidiedLetter) return;
 
-  const letterToSanitize = isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter;
-  console.log("Current Tidied Message State for Facebook:", letterToSanitize);
+    const letterToSanitize = isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter;
+    console.log("Current Tidied Message State for Facebook:", letterToSanitize);
 
-  const sanitizedLetterLines = letterToSanitize.split("\n");
-  let bodyEndIndex = sanitizedLetterLines.length;
-  for (let i = 1; i < sanitizedLetterLines.length; i++) {
-    const line = sanitizedLetterLines[i].trim().toLowerCase();
-    if (
-      line.match(/^(yours sincerely,|sincerely,)/i) ||
-      line.includes(formData.fullName.toLowerCase()) ||
-      line.includes(formData.address.toLowerCase()) ||
-      line.includes(formData.userEmail.toLowerCase()) ||
-      line.includes(formData.postcode.toLowerCase()) ||
-      line.startsWith("i appreciate your attention to this matter and look forward to")
-    ) {
-      bodyEndIndex = i;
-      break;
+    const sanitizedLetterLines = letterToSanitize.split("\n");
+    let bodyEndIndex = sanitizedLetterLines.length;
+    for (let i = 1; i < sanitizedLetterLines.length; i++) {
+      const line = sanitizedLetterLines[i].trim().toLowerCase();
+      if (
+        line.match(/^(yours sincerely,|sincerely,)/i) ||
+        line.includes(formData.fullName.toLowerCase()) ||
+        line.includes(formData.address.toLowerCase()) ||
+        line.includes(formData.userEmail.toLowerCase()) ||
+        line.includes(formData.postcode.toLowerCase()) ||
+        line.startsWith("i appreciate your attention to this matter and look forward to")
+      ) {
+        bodyEndIndex = i;
+        break;
+      }
     }
-  }
 
-  if (bodyEndIndex <= 1) {
-    throw new Error("Could not determine the end of the message body in the tidied message.");
-  }
+    if (bodyEndIndex <= 1) {
+      throw new Error("Could not determine the end of the message body in the tidied message.");
+    }
 
-  const bodyLines = sanitizedLetterLines.slice(1, bodyEndIndex).filter(
-    (line) =>
-      !line.toLowerCase().startsWith("my personal experience:") &&
-      !line.toLowerCase().startsWith("to address this problem,") &&
-      !line.toLowerCase().startsWith("i appreciate your attention to this matter and look forward to")
-  );
+    const bodyLines = sanitizedLetterLines.slice(1, bodyEndIndex).filter(
+      (line) =>
+        !line.toLowerCase().startsWith("my personal experience:") &&
+        !line.toLowerCase().startsWith("to address this problem,") &&
+        !line.toLowerCase().startsWith("i appreciate your attention to this matter and look forward to")
+    );
 
-  const sanitizedLetter = `
+    const sanitizedLetter = `
 Dear ${mpDetails?.name ?? "MP"},
 
 ${bodyLines.join("\n").trim()}
 
 Yours sincerely,
 [Name omitted]
-  `.trim();
+    `.trim();
 
-  const originalContent = tidiedLetterRef.current.innerText;
-  tidiedLetterRef.current.innerText = sanitizedLetter;
+    const originalContent = tidiedLetterRef.current.innerText;
+    tidiedLetterRef.current.innerText = sanitizedLetter;
 
-  await new Promise((resolve) => setTimeout(resolve, 2500));
+    await new Promise((resolve) => setTimeout(resolve, 2500));
 
-  let attempts = 0;
-  const maxAttempts = 10;
-  while (attempts < maxAttempts && tidiedLetterRef.current?.innerText !== sanitizedLetter) {
-    console.log(`Attempt ${attempts + 1}: Tidied Message Ref`, tidiedLetterRef.current?.innerText);
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    attempts++;
-  }
-
-  console.log("Tidied Message Ref Before Screenshot (Final):", tidiedLetterRef.current?.innerText);
-  console.log("Sanitized Message for Facebook:", sanitizedLetter);
-
-  try {
-    const canvas = await html2canvas(tidiedLetterRef.current, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      foreignObjectRendering: false,
-      ignoreElements: (element) => element.tagName === "SCRIPT" || element.tagName === "STYLE",
-    });
-    const imageDataUrl = canvas.toDataURL("image/png");
-
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = canvas.width;
-    tempCanvas.height = canvas.height;
-    const tempContext = tempCanvas.getContext("2d");
-    if (tempContext) {
-      tempContext.drawImage(canvas, 0, 0);
+    let attempts = 0;
+    const maxAttempts = 10;
+    while (attempts < maxAttempts && tidiedLetterRef.current?.innerText !== sanitizedLetter) {
+      console.log(`Attempt ${attempts + 1}: Tidied Message Ref`, tidiedLetterRef.current?.innerText);
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      attempts++;
     }
-    const jpegImageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.9);
 
-    let blob;
+    console.log("Tidied Message Ref Before Screenshot (Final):", tidiedLetterRef.current?.innerText);
+    console.log("Sanitized Message for Facebook:", sanitizedLetter);
+
     try {
-      blob = await fetch(imageDataUrl).then((res) => res.blob());
-    } catch (pngError) {
-      console.error("PNG copy failed, trying JPEG:", pngError);
-      blob = await fetch(jpegImageDataUrl).then((res) => res.blob());
+      const canvas = await html2canvas(tidiedLetterRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        ignoreElements: (element) => element.tagName === "SCRIPT" || element.tagName === "STYLE",
+      });
+      const imageDataUrl = canvas.toDataURL("image/png");
+
+      const tempCanvas = document.createElement("canvas");
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      const tempContext = tempCanvas.getContext("2d");
+      if (tempContext) {
+        tempContext.drawImage(canvas, 0, 0);
+      }
+      const jpegImageDataUrl = tempCanvas.toDataURL("image/jpeg", 0.9);
+
+      let blob;
+      try {
+        blob = await fetch(imageDataUrl).then((res) => res.blob());
+      } catch (pngError) {
+        console.error("PNG copy failed, trying JPEG:", pngError);
+        blob = await fetch(jpegImageDataUrl).then((res) => res.blob());
+      }
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": blob,
+        }),
+      ]);
+      alert("Screenshot of the tidied message copied to clipboard! Paste it into your Facebook post (use Ctrl+V or Cmd+V).");
+
+      const url = window.location.href;
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+      window.open(facebookUrl, "_blank", "width=600,height=400");
+    } catch (err) {
+      console.error("Failed to generate screenshot or copy to clipboard:", err);
+      setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
+
+      const url = window.location.href;
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+      window.open(facebookUrl, "_blank", "width=600,height=400");
+    } finally {
+      tidiedLetterRef.current.innerText = originalContent;
     }
-
-    await navigator.clipboard.write([
-      new ClipboardItem({
-        "image/png": blob,
-      }),
-    ]);
-    alert("Screenshot of the tidied message copied to clipboard! Paste it into your Facebook post (use Ctrl+V or Cmd+V).");
-
-    const url = window.location.href;
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-    window.open(facebookUrl, "_blank", "width=600,height=400");
-  } catch (err) {
-    console.error("Failed to generate screenshot or copy to clipboard:", err);
-    setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
-
-    const url = window.location.href;
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-    window.open(facebookUrl, "_blank", "width=600,height=400");
-  } finally {
-    tidiedLetterRef.current.innerText = originalContent;
-  }
-};
+  };
 
   const handleEditToggle = () => {
     setIsEditingTidiedLetter(!isEditingTidiedLetter);
@@ -817,16 +815,13 @@ Yours sincerely,
                 required
                 onKeyDown={handlePostcodeKeyDown}
               />
-              <div className="mb-4">
-                <ReCAPTCHA
-                  sitekey="6LfOXegqAAAAAKICAvPf0aOqWKmzefenTTnBT-JJ"
-                  onChange={handleCaptchaChange}
-                />
+              <div className="mb-4 text-gray-600 dark:text-gray-300 text-sm">
+                Note: This is a beta version without CAPTCHA. Please use responsibly.
               </div>
               <button
                 onClick={handleSearch}
-                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:bg-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700"
-                disabled={loading || !captchaVerified}
+                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                disabled={loading}
               >
                 {loading ? "Searching..." : "Find My MP"}
               </button>
