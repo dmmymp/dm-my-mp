@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { spawn } from "child_process";
-import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,44 +11,63 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const scriptPath = path.join(process.cwd(), "mistral_tidy_letter.py");
-    const pythonProcess = spawn("python3", [
-      scriptPath,
-      JSON.stringify({ letter, name, address, email }),
-    ]);
+    // Construct a prompt for Hugging Face to tidy the letter
+    const prompt = `Rephrase the following letter to be concise, polite, and professional, suitable for addressing a Member of Parliament. Include the constituent's name, address, and email at the top, followed by a formal salutation (e.g., "Dear [MP's Name],"). Keep the letter under 300 words and end with a closing like "Yours sincerely, [Name]".
 
-    let output = "";
-    let errorOutput = "";
+Constituent Details:
+Name: ${name}
+Address: ${address}
+Email: ${email}
 
-    pythonProcess.stdout.on("data", (data) => {
-      output += data.toString();
-    });
+Original Letter:
+${letter}
 
-    pythonProcess.stderr.on("data", (data) => {
-      errorOutput += data.toString();
-    });
+Tidied Letter (output between ===BEGIN=== and ===END===):
+===BEGIN===
+[Tidied letter here]
+===END===`;
 
-    const code = await new Promise((resolve) => {
-      pythonProcess.on("close", resolve);
-    });
+    // Call Hugging Face Inference API
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/t5-base",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.HUGGINGFACE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: {
+            max_length: 500,
+            temperature: 0.7,
+          },
+        }),
+      }
+    );
 
-    if (code !== 0) {
-      console.error("Python script error:", errorOutput);
-      return NextResponse.json({ error: "Error in Python script." }, { status: 500 });
+    if (!response.ok) {
+      throw new Error("Hugging Face API request failed");
     }
 
-    // Extract tidied letter between ===BEGIN=== and ===END===
-    const match = output.match(/===BEGIN===([\s\S]*?)===END===/);
+    const output = await response.json();
+    const generatedText = output[0]?.generated_text || "";
+    const match = generatedText.match(/===BEGIN===([\s\S]*?)===END===/);
     const tidiedLetter = match ? match[1].trim() : null;
 
     if (!tidiedLetter) {
       console.warn("No tidied letter found in output.");
-      return NextResponse.json({ tidiedLetter: "⚠️ Model returned no response." });
+      return NextResponse.json({
+        tidiedLetter: "⚠️ Model returned no response.",
+      });
     }
 
     return NextResponse.json({ tidiedLetter });
   } catch (err) {
-    console.error("API Error:", err);
-    return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
+    console.error("API Error:", err.message || err);
+    return NextResponse.json(
+      { error: "An unexpected error occurred." },
+      { status: 500 }
+    );
   }
 }
