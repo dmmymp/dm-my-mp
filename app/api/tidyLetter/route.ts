@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const prompt = `Rephrase the following letter to be concise, polite, and professional, suitable for addressing a Member of Parliament. Include the constituent's name, address, and email at the top, followed by a formal salutation (e.g., "Dear [MP's Name],"). Keep the letter under 300 words and end with a closing like "Yours sincerely, [Name]".
+    const prompt = `Rephrase the following letter to be concise, polite, and professional, suitable for addressing a Member of Parliament. Include the constituent's name, address, and email at the top, followed by a formal salutation (e.g., "Dear [MP's Name],"). Use formal language, clear structure (e.g., introduction, concern, request, closing), and keep it under 300 words. End with "Yours sincerely, [Name]".
 
     Constituent Details:
     Name: ${name}
@@ -19,15 +19,10 @@ export async function POST(req: NextRequest) {
     Email: ${email}
 
     Original Letter:
-    ${letter}
-
-    Tidied Letter (output between ===BEGIN=== and ===END===):
-    ===BEGIN===
-    [Tidied letter here]
-    ===END===`;
+    ${letter}`;
 
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/t5-base",
+      "https://api-inference.huggingface.co/models/google/flan-t5-base",
       {
         method: "POST",
         headers: {
@@ -45,24 +40,23 @@ export async function POST(req: NextRequest) {
     );
 
     if (!response.ok) {
-      throw new Error("Hugging Face API request failed");
+      const errorText = await response.text();
+      console.error("Hugging Face API error:", response.status, errorText);
+      throw new Error(`Hugging Face API request failed with status ${response.status}: ${errorText}`);
     }
 
     const output = await response.json();
+    console.log("API Response:", output); // Debug the raw response
     const generatedText = output[0]?.generated_text || "";
-    const match = generatedText.match(/===BEGIN===([\s\S]*?)===END===/);
-    const tidiedLetter = match ? match[1].trim() : null;
+    let tidiedLetter = generatedText.trim();
 
-    if (!tidiedLetter) {
-      console.warn("No tidied letter found in output.");
-      return NextResponse.json({
-        tidiedLetter: "⚠️ Model returned no response.",
-      });
+    if (!tidiedLetter || tidiedLetter.length < 10) {
+      console.warn("No valid tidied letter generated. Falling back.");
+      tidiedLetter = `${name}\n${address}\n${email}\n\nDear [MP's Name],\n\n${letter.trim()}\n\nYours sincerely,\n${name}`;
     }
 
     return NextResponse.json({ tidiedLetter });
   } catch (err: unknown) {
-    // Narrow the type of err to Error or handle as unknown
     const errorMessage = err instanceof Error ? err.message : String(err);
     console.error("API Error:", errorMessage);
     return NextResponse.json(
