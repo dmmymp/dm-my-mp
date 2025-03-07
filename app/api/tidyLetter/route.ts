@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Construct a prompt for Hugging Face to tidy the letter
     const prompt = `Rephrase the following letter to be concise, polite, and professional, suitable for addressing a Member of Parliament. Include the constituent's name, address, and email at the top, followed by a formal salutation (e.g., "Dear [MP's Name],"). Keep the letter under 300 words and end with a closing like "Yours sincerely, [Name]".
 
 Constituent Details:
@@ -27,7 +26,6 @@ Tidied Letter (output between ===BEGIN=== and ===END===):
 [Tidied letter here]
 ===END===`;
 
-    // Call Hugging Face Inference API
     const response = await fetch(
       "https://api-inference.huggingface.co/models/t5-base",
       {

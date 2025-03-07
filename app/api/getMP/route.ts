@@ -63,9 +63,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     ].join("\n");
 
     return NextResponse.json({ mpDetails: formattedData });
-  } catch (error) {
-    console.error("Error processing request:", error.message || error);
-    if (error.name === "AbortError") {
+  } catch (error: unknown) {
+    // Narrow the type of error to Error or handle as unknown
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error processing request:", errorMessage);
+
+    if (error instanceof Error && error.name === "AbortError") {
       return NextResponse.json({ error: "Request timed out" }, { status: 504 });
     }
     return NextResponse.json({ error: "Failed to fetch MP data" }, { status: 500 });
