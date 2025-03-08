@@ -50,7 +50,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const mpData = records.find((record: MPRecord) => 
       record.Constituency.toLowerCase() === constituency.toLowerCase()
     );
-
     if (!mpData) {
       return NextResponse.json({ error: "No MP found for this constituency" }, { status: 404 });
     }
@@ -64,10 +63,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ mpDetails: formattedData });
   } catch (error: unknown) {
-    // Narrow the type of error to Error or handle as unknown
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Error processing request:", errorMessage);
-
     if (error instanceof Error && error.name === "AbortError") {
       return NextResponse.json({ error: "Request timed out" }, { status: 504 });
     }

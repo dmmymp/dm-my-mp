@@ -11,75 +11,80 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Pre-format the header and structure
-    const header = `${name}\n${address}\n${email}\n\nDear [MP's Name],\n\n`;
-    const closing = `\n\nYours sincerely,\n${name}`;
+    const header = `\n${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}\n\n`;
+    const closing = `\n\n`;
 
-    // Prompt for Mistral API
-    const prompt = `You are a professional editor assisting a constituent. Rephrase the following letter to be concise, polite, and professional, suitable for addressing a Member of Parliament. Use formal language, avoid repeating the original wording where possible, and keep it under 200 words. Do not include the constituent's details, salutation, or closing—these will be added separately.
+    const prompt = `You are a professional editor assisting a constituent. Rephrase the following letter to be simple, concise, polite, and professional, suitable for addressing a Member of Parliament. Use formal language, and keep short. Focus only on the body of the letter. Include an appropriate salutation (e.g., 'Dear Mr. [MP Name]') based on the context of the original letter.
 
     Original Letter:
     ${letter}
 
-    Rephrased Letter:`;
+    Rephrased Letter Body (under 500 words, clear and concise):`;
 
-    const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.MISTRAL_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "mistral-small", // Adjust based on available models
-        messages: [
-          { role: "system", content: "You are a professional editor." },
-          { role: "user", content: prompt },
-        ],
-        max_tokens: 300,
-        temperature: 0.7,
-      }),
-    });
+    let response;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Mistral API error:", response.status, errorText);
-      throw new Error(`Mistral API request failed with status ${response.status}: ${errorText}`);
+      try {
+        console.log(`Attempt ${attempt}: Fetching from Mistral API`);
+        response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.MISTRAL_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "mistral-small",
+            messages: [
+              { role: "system", content: "You are a professional editor." },
+              { role: "user", content: prompt },
+            ],
+            max_tokens: 300,
+            temperature: 0.7,
+          }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (response.ok) break;
+        const errorResponse = response.clone();
+        const errorText = await errorResponse.text();
+        console.error(`Mistral API error (attempt ${attempt}):`, response.status, errorText);
+        if (response.status !== 429) break; // Don't retry on non-rate-limit errors
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.error(`Fetch attempt ${attempt} failed:`, err.message);
+        if (attempt === 3) throw err;
+      }
     }
 
-    const output = await response.json();
+    if (!response || !response.ok) {
+      const errorResponse = response?.clone() || { text: () => Promise.resolve("No response") };
+      const errorText = await errorResponse.text();
+      console.error("Final Mistral API failure:", response?.status, errorText);
+      throw new Error(`Mistral API request failed: ${errorText}`);
+    }
+
+    const outputResponse = response.clone();
+    const output = await outputResponse.json();
     console.log("API Response:", output);
     const generatedText = output.choices[0]?.message?.content || "";
     let tidiedBody = generatedText.trim();
 
-    // Validate and fallback if the response is inadequate
     if (!tidiedBody || tidiedBody.length < 10 || !tidiedBody.includes(".")) {
-      console.warn("No valid tidied letter body generated. Falling back.");
-      tidiedBody = generateContextAwareFallback(letter);
+      throw new Error("No valid tidied letter body generated.");
     }
 
-    // Combine header, tidied body, and closing
     const tidiedLetter = `${header}${tidiedBody}${closing}`;
-
     return NextResponse.json({ tidiedLetter });
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error("API Error:", errorMessage);
+    console.error("API Error:", errorMessage, "Stack:", err instanceof Error ? err.stack : "N/A");
     return NextResponse.json(
       { error: "An unexpected error occurred." },
       { status: 500 }
     );
   }
-}
-
-// Function to generate a context-aware fallback based on the input letter
-function generateContextAwareFallback(originalLetter: string): string {
-  const keywords = originalLetter.toLowerCase().match(/\b\w+\b/g) || [];
-  if (keywords.includes("park") || keywords.includes("dirty")) {
-    return `I am writing to express my concern about the cleanliness of the local park. It has recently become quite dirty, diminishing its value as a community space. I kindly request your assistance in arranging for its cleanup and ensuring its ongoing maintenance to keep it a pleasant environment for all residents. Thank you for your attention to this matter. I look forward to your response.`;
-  } else if (keywords.includes("government") || keywords.includes("overreach")) {
-    return `I am writing to express my concern regarding potential government overreach. I am troubled by the broad interpretation of laws affecting online criticism, which may suppress legitimate speech. I respectfully request your support in advocating for amendments to protect free expression. Thank you for your attention to this issue. I look forward to your response.`;
-  } else if (keywords.includes("education") || keywords.includes("school")) {
-    return `I am writing to express my concern about the state of education in our area. I have noticed issues with ${keywords.includes("school") ? "school facilities" : "educational resources"} that need attention. I kindly request your support in addressing these challenges to improve opportunities for students. Thank you for your attention to this matter. I look forward to your response.`;
-  }
-  return `I am writing to bring to your attention a matter of concern regarding ${originalLetter.trim()}. I kindly request your assistance in addressing this issue. Thank you for your attention, and I look forward to your response.`;
 }
