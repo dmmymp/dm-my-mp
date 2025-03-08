@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
       } catch (err) {
         clearTimeout(timeoutId);
-        console.error(`Fetch attempt ${attempt} failed:`, err.message);
+        console.error(`Fetch attempt ${attempt} failed:`, err instanceof Error ? err.message : String(err));
         if (attempt === 3) throw err;
       }
     }
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     const output = await outputResponse.json();
     console.log("API Response:", output);
     const generatedText = output.choices[0]?.message?.content || "";
-    const tidiedBody = generatedText.trim(); // Changed from 'let' to 'const'
+    const tidiedBody = generatedText.trim();
 
     if (!tidiedBody || tidiedBody.length < 10 || !tidiedBody.includes(".")) {
       throw new Error("No valid tidied letter body generated.");
