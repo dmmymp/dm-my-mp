@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     const output = await outputResponse.json();
     console.log("API Response:", output);
     const generatedText = output.choices[0]?.message?.content || "";
-    let tidiedBody = generatedText.trim();
+    const tidiedBody = generatedText.trim(); // Changed from 'let' to 'const'
 
     if (!tidiedBody || tidiedBody.length < 10 || !tidiedBody.includes(".")) {
       throw new Error("No valid tidied letter body generated.");
