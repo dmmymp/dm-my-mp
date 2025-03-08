@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const header = `\n${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}\n\n`;
     const closing = `\n\n`;
 
-    const prompt = `You are a professional editor assisting a constituent. Rephrase the following letter to be simple, concise, polite, and professional, suitable for addressing a Member of Parliament. Use formal language, and keep short. Focus only on the body of the letter. Include an appropriate salutation (e.g., 'Dear Mr. [MP Name]') based on the context of the original letter.
+    const prompt = `You are a professional editor assisting a constituent. Rephrase the following letter to be simple, concise, polite, and professional, suitable for addressing a Member of Parliament. Use formal language, and keep short. Focus only on the body of the letter. Include an appropriate salutation as they appear in the original letter') based on the context of the original letter.
 
     Original Letter:
     ${letter}
