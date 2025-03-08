@@ -43,3 +43,4 @@ yarn-error.log*
 # IDEs
 .idea/
 .vscode/test-env.js
+test-env.js
