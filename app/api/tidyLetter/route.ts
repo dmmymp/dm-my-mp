@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
 
       try {
+        console.log("MISTRAL_API_KEY in process.env:", process.env.MISTRAL_API_KEY || "undefined");
         console.log(`Attempt ${attempt}: Fetching from Mistral API`);
         response = await fetch("https://api.mistral.ai/v1/chat/completions", {
           method: "POST",
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
               { role: "system", content: "You are a professional editor." },
               { role: "user", content: prompt },
             ],
-            max_tokens: 300,
+            max_tokens: 400,
             temperature: 0.7,
           }),
           signal: controller.signal,
