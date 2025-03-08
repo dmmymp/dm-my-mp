@@ -28,6 +28,10 @@ export async function POST(req: NextRequest) {
 
       try {
         console.log("MISTRAL_API_KEY in process.env:", process.env.MISTRAL_API_KEY || "undefined");
+        if (!process.env.MISTRAL_API_KEY) {
+          console.error("MISTRAL_API_KEY is not defined in environment variables");
+          throw new Error("MISTRAL_API_KEY is not defined");
+        }
         console.log(`Attempt ${attempt}: Fetching from Mistral API`);
         response = await fetch("https://api.mistral.ai/v1/chat/completions", {
           method: "POST",
@@ -88,4 +92,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
