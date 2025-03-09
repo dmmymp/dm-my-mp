@@ -273,7 +273,7 @@ export default function Home() {
       },
       {
         problem: "Language barriers limit access to local help.",
-        solution: "Advocate for more translation services in our area.",
+        solution: "Advocate for English language training to improve integration.",
       },
     ],
     "Crime & Safety - (Local crime, policing, community safety)": [
