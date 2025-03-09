@@ -798,7 +798,7 @@ Yours sincerely,
             <h1 className="text-2xl font-bold mb-2 text-black dark:text-white">DM My MP - Beta</h1>
             <p className="text-gray-600 mb-4 dark:text-gray-300">Contact your representative about an important issue in minutes.</p>
             <p className="text-sm text-yellow-600 mb-4 dark:text-yellow-400">
-              This is a beta version—please report issues to <a href="mailto:dmmymp@gmail.com" className="underline">feedback@dmmymp.com</a>.
+              This is a beta version—please report issues to <a href="mailto:dmmymp@gmail.com" className="underline">feedback</a>.
             </p>
             <div className="w-full max-w-md">
               <p className="text-sm text-gray-700 mb-4 dark:text-gray-300">
@@ -846,7 +846,7 @@ Yours sincerely,
               </Link>
             </div>
             <p className="text-sm text-yellow-600 mb-4 dark:text-yellow-400 text-center">
-              This is a beta version—please report issues to <a href="mailto:dmmymp@gmail.com" className="underline">feedback@dmmymp.com</a>.
+              This is a beta version—please report issues to <a href="mailto:dmmymp@gmail.com" className="underline">feedback</a>.
             </p>
             <ProgressIndicator currentStep={getCurrentStep()} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
