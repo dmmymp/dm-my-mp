@@ -94,11 +94,11 @@ const ProgressIndicator = ({ currentStep }: { currentStep: number }) => (
     <span className={`mr-2 ${currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       1. Find MP
     </span>
-    <span className="mr-2 dark:text-gray-300">{">"}</span> {/* Changed > to {">"} */}
+    <span className="mr-2 dark:text-gray-300">{">"}</span>
     <span className={`mr-2 ${currentStep >= 2 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       2. Write Message
     </span>
-    <span className="mr-2 dark:text-gray-300">{">"}</span> {/* Changed > to {">"} */}
+    <span className="mr-2 dark:text-gray-300">{">"}</span>
     <span className={`${currentStep >= 3 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
       3. Send
     </span>
@@ -818,13 +818,20 @@ Yours sincerely,
               <div className="mb-4 text-gray-600 dark:text-gray-300 text-sm">
                 Note: This is a beta version without CAPTCHA. Please use responsibly.
               </div>
-              <button
-                onClick={handleSearch}
-                className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
-                disabled={loading}
-              >
-                {loading ? "Searching..." : "Find My MP"}
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={handleSearch}
+                  className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700"
+                  disabled={loading}
+                >
+                  {loading ? "Searching..." : "Find My MP"}
+                </button>
+                <Link href="/insights">
+                  <button className="w-full bg-gray-700 text-white p-2 rounded hover:bg-gray-800 dark:bg-purple-600 dark:hover:bg-purple-700">
+                  Top Issues in Your Area (Demo Only)
+                  </button>
+                </Link>
+              </div>
               {error && <p className="text-red-500 mt-4 text-center dark:text-red-400">{error}</p>}
             </div>
             <footer className="mt-8 text-center text-gray-600 dark:text-gray-300">
@@ -839,11 +846,6 @@ Yours sincerely,
           <div className="max-w-6xl mx-auto bg-white dark:bg-gray-900">
             <div className="flex justify-between items-center mb-6">
               <h1 className="text-2xl font-bold text-black dark:text-white">Send a DM to Your MP - Beta</h1>
-              <Link href="/insights">
-                <button className="bg-purple-500 text-white p-2 rounded hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700">
-                  Constituency Insights (See What Your Neighbours Care About)
-                </button>
-              </Link>
             </div>
             <p className="text-sm text-yellow-600 mb-4 dark:text-yellow-400 text-center">
               This is a beta version—please report issues to <a href="mailto:dmmymp@gmail.com" className="underline">feedback</a>.

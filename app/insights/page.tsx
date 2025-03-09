@@ -25,7 +25,7 @@ export default function Insights() {
         Constituency Insights (See What Your Neighbours Care About)
       </h1>
       <p className="text-gray-700 mb-6 dark:text-gray-300 text-center">
-        Anonymized concerns from letters sent by constituents. Data reflects opt-in submissions across UK constituencies.
+        (Demo only - no data is being collected and analysed yet) Anonymized concerns from letters sent by constituents. Data reflects opt-in submissions across UK constituencies.
       </p>
 
       <section className="mb-8">
