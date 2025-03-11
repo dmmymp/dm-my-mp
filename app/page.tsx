@@ -867,7 +867,7 @@ Yours sincerely,
                   <p className="text-black dark:text-white"><strong className="text-black dark:text-white">Email:</strong> {mpDetails.email}</p>
                   <button
                     onClick={() => handleCopyToClipboard(mpDetails.email)}
-                    className="bg-gray-300 text-black px-2 py-1 rounded hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+                    className="bg-gray-300 text-black px-2 py-1 rounded hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 text-xs"
                   >
                     Copy Email
                   </button>
