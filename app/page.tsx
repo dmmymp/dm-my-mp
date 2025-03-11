@@ -90,18 +90,20 @@ const TextAreaField = ({
 );
 
 const ProgressIndicator = ({ currentStep }: { currentStep: number }) => (
-  <div className="flex justify-center mb-6 text-sm font-medium text-gray-700 dark:text-gray-300">
-    <span className={`mr-2 ${currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
-      1. Find MP
-    </span>
-    <span className="mr-2 dark:text-gray-300">{">"}</span>
-    <span className={`mr-2 ${currentStep >= 2 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
-      2. Write Message
-    </span>
-    <span className="mr-2 dark:text-gray-300">{">"}</span>
-    <span className={`${currentStep >= 3 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
-      3. Send
-    </span>
+  <div className="flex justify-center mb-6 text-sm font-bold text-gray-700 dark:text-gray-300 bg-gray-100 p-2 rounded-lg shadow-md">
+    <div className="flex items-center">
+      <span className={`mr-2 font-bold ${currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
+        1. Find MP <span className="text-xs italic font-normal">(Enter your postcode)</span>
+      </span>
+      <span className="mr-2 dark:text-gray-300">{">"}</span>
+      <span className={`mr-2 font-bold ${currentStep >= 2 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
+        2. Write Message <span className="text-xs italic font-normal">(Fill all boxes)</span>
+      </span>
+      <span className="mr-2 dark:text-gray-300">{">"}</span>
+      <span className={`font-bold ${currentStep >= 3 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
+        3. Send <span className="text-xs italic font-normal">(Tidy & email/share)</span>
+      </span>
+    </div>
   </div>
 );
 
@@ -131,6 +133,7 @@ export default function Home() {
   const [emailSent, setEmailSent] = useState<boolean>(false);
   const [showLegalReminder, setShowLegalReminder] = useState<boolean>(false);
   const [suggestionIndex, setSuggestionIndex] = useState<number>(0);
+  const [showTidyPopup, setShowTidyPopup] = useState(false); // New state for tidy popup
   const tidiedLetterRef = useRef<HTMLPreElement | HTMLTextAreaElement>(null);
 
   const issueOptions = [
@@ -148,7 +151,7 @@ export default function Home() {
     "Environment - (Sustainability, pollution, green spaces)",
     "Other - (Specify your own issue)",
   ];
-  
+
   const scriptedPrompts: { [key: string]: { problem: string; solution: string }[] } = {
     "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)": [
       {
@@ -463,7 +466,7 @@ export default function Home() {
       },
     ],
   };
-  
+
   const getProblemPlaceholder = (issue: string) => {
     switch (issue) {
       case "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)":
@@ -972,7 +975,7 @@ Yours sincerely,
                 </button>
                 <Link href="/insights">
                   <button className="w-full bg-gray-700 text-white p-2 rounded hover:bg-gray-800 dark:bg-purple-600 dark:hover:bg-purple-700">
-                  Top Issues in Your Area (Demo Only)
+                    Top Issues in Your Area (Demo Only)
                   </button>
                 </Link>
               </div>
@@ -1104,8 +1107,7 @@ Yours sincerely,
                   </button>
                 </div>
                 <p className="text-xs text-gray-600 mb-4 dark:text-gray-400">
-                  Prompts based on common UK constituency concerns from public data (e.g.,{" "}
-                  <a href="https://www.gov.uk/government/statistics" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">gov.uk reports</a>).
+                  Prompts based on common UK constituency concerns from public data (e.g., <a href="https://www.gov.uk/government/statistics" className="text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300">gov.uk reports</a>).
                 </p>
 
                 <TextAreaField
@@ -1139,8 +1141,14 @@ Yours sincerely,
 
               <div className="p-4 border rounded bg-white text-black dark:bg-gray-900 dark:text-white dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-2 text-black dark:text-white">Draft Message Preview</h3>
-                <pre className="whitespace-pre-wrap mb-4 min-h-[400px] border p-2 rounded bg-gray-50 dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                  {letter || "Fill in the required fields to preview your message."}
+                <p className="text-gray-600 mb-2 dark:text-gray-400">
+                  This preview updates as you fill the form. Scroll to see it grow!
+                </p>
+                <pre
+                  className="whitespace-pre-wrap mb-4 min-h-[400px] border p-2 rounded bg-gray-50 dark:bg-gray-800 dark:text-white dark:border-gray-700 transition-all duration-300"
+                  style={{ borderColor: letter ? "green" : "gray" }}
+                >
+                  {letter || "Start typing above to see your draft message here..."}
                 </pre>
 
                 <button
