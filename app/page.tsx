@@ -148,7 +148,7 @@ export default function Home() {
     "Environment - (Sustainability, pollution, green spaces)",
     "Other - (Specify your own issue)",
   ];
-
+  
   const scriptedPrompts: { [key: string]: { problem: string; solution: string }[] } = {
     "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)": [
       {
@@ -162,6 +162,18 @@ export default function Home() {
       {
         problem: "Local events have seen police overreach in managing public dissent.",
         solution: "Support guidelines to limit police action to actual threats, not opinions.",
+      },
+      {
+        problem: "I’ve noticed people being fined for social media posts about politics.",
+        solution: "Propose a public debate to refine online speech rules.",
+      },
+      {
+        problem: "In my area, expressing views at public meetings feels risky.",
+        solution: "Encourage community forums with legal oversight.",
+      },
+      {
+        problem: "I’ve heard of friends silenced by vague speech laws.",
+        solution: "Suggest a citizen-led review of speech legislation.",
       },
     ],
     "Government Accountability - (Policy transparency, Online Safety Act concerns, government oversight)": [
@@ -177,6 +189,18 @@ export default function Home() {
         problem: "Oversight of government actions feels weak in our area.",
         solution: "Advocate for stronger independent reviews of policy effects.",
       },
+      {
+        problem: "I’ve noticed local policies announced with no prior consultation.",
+        solution: "Propose a citizen feedback app for policy drafts.",
+      },
+      {
+        problem: "In my town, budget cuts lack clear justification.",
+        solution: "Suggest open Q&A sessions with local officials.",
+      },
+      {
+        problem: "I’ve seen online laws confuse residents about their rights.",
+        solution: "Encourage a simplified online rights guide.",
+      },
     ],
     "Cost of Living - (Food prices, energy bills, financial pressures)": [
       {
@@ -190,6 +214,18 @@ export default function Home() {
       {
         problem: "Rising rents are pushing people out of our community.",
         solution: "Advocate for rent caps or more affordable housing options.",
+      },
+      {
+        problem: "I’ve struggled to heat my home this winter.",
+        solution: "Propose a community energy-sharing scheme.",
+      },
+      {
+        problem: "In my area, grocery costs make it hard to feed my family.",
+        solution: "Suggest local food co-ops to reduce prices.",
+      },
+      {
+        problem: "I’ve noticed friends cutting back due to rising costs.",
+        solution: "Encourage a barter network for essential goods.",
       },
     ],
     "Healthcare - (NHS staff shortages, NHS waiting times, access to services)": [
@@ -205,6 +241,18 @@ export default function Home() {
         problem: "Specialist services are too far away for many residents.",
         solution: "Push for mobile clinics or better transport to healthcare.",
       },
+      {
+        problem: "I’ve waited months for a doctor’s appointment.",
+        solution: "Propose a telemedicine pilot for routine checkups.",
+      },
+      {
+        problem: "In my town, elderly neighbors can’t access urgent care.",
+        solution: "Suggest a neighborhood health volunteer network.",
+      },
+      {
+        problem: "I’ve seen friends struggle with mental health support delays.",
+        solution: "Encourage peer-support groups with MP backing.",
+      },
     ],
     "Social Care & Welfare - (Access delays, quality concerns, funding shortfalls)": [
       {
@@ -218,6 +266,18 @@ export default function Home() {
       {
         problem: "Welfare delays are leaving families in hardship.",
         solution: "Press for faster processing of welfare claims locally.",
+      },
+      {
+        problem: "I’ve seen a relative wait too long for home care.",
+        solution: "Propose a care scheduling app for quicker matches.",
+      },
+      {
+        problem: "In my area, care homes have inconsistent standards.",
+        solution: "Suggest peer reviews by local care users.",
+      },
+      {
+        problem: "I’ve noticed friends struggling with delayed benefits.",
+        solution: "Encourage a community welfare advice hotline.",
       },
     ],
     "Education - (Teacher shortages, funding pressure, youth services)": [
@@ -233,6 +293,18 @@ export default function Home() {
         problem: "Youth services have shrunk, leaving kids with few options.",
         solution: "Advocate for restoring local youth programs.",
       },
+      {
+        problem: "I’ve noticed my child’s class has no art supplies.",
+        solution: "Propose a school swap program for unused materials.",
+      },
+      {
+        problem: "In my area, kids lack after-school activities.",
+        solution: "Suggest community-led youth clubs using existing spaces.",
+      },
+      {
+        problem: "I’ve seen teachers overstretched at my kid’s school.",
+        solution: "Encourage a parent-teacher mentoring initiative.",
+      },
     ],
     "Housing - (Affordability, homelessness, social housing)": [
       {
@@ -246,6 +318,18 @@ export default function Home() {
       {
         problem: "Young families can’t buy homes here anymore.",
         solution: "Advocate for affordable homeownership schemes.",
+      },
+      {
+        problem: "I’ve struggled to find a flat I can afford.",
+        solution: "Propose a tenant-landlord mediation service.",
+      },
+      {
+        problem: "In my town, homeless people sleep near my home.",
+        solution: "Suggest a community outreach program for support.",
+      },
+      {
+        problem: "I’ve seen young couples leave due to housing costs.",
+        solution: "Encourage shared housing schemes for first-timers.",
       },
     ],
     "Jobs & Economy - (Employment opportunities, local economy stagnation)": [
@@ -261,6 +345,18 @@ export default function Home() {
         problem: "Young people are leaving for work elsewhere.",
         solution: "Push for training schemes to keep talent here.",
       },
+      {
+        problem: "I’ve lost my job and can’t find new work locally.",
+        solution: "Propose a skills-sharing network among locals.",
+      },
+      {
+        problem: "In my area, shops keep shutting down.",
+        solution: "Suggest a local business mentoring program.",
+      },
+      {
+        problem: "I’ve noticed teens leaving for city jobs.",
+        solution: "Encourage remote work hubs in our community.",
+      },
     ],
     "Community & Cohesion - (Immigration, integration issues, local service strain)": [
       {
@@ -274,6 +370,18 @@ export default function Home() {
       {
         problem: "Language barriers limit access to local help.",
         solution: "Advocate for English language training to improve integration.",
+      },
+      {
+        problem: "I’ve seen long waits at my local clinic due to population growth.",
+        solution: "Propose a community health info day.",
+      },
+      {
+        problem: "In my area, new families feel isolated.",
+        solution: "Suggest a welcome buddy system with locals.",
+      },
+      {
+        problem: "I’ve noticed concerns about illegal immigration affecting trust.",
+        solution: "Encourage a public forum to discuss integration policies fairly.",
       },
     ],
     "Crime & Safety - (Local crime, policing, community safety)": [
@@ -289,6 +397,18 @@ export default function Home() {
         problem: "Poor lighting increases safety fears at night.",
         solution: "Advocate for better street lighting locally.",
       },
+      {
+        problem: "I’ve had my bike stolen near my home.",
+        solution: "Propose a neighborhood watch app for reporting.",
+      },
+      {
+        problem: "In my area, teens are causing trouble at night.",
+        solution: "Suggest a youth dialogue group with community leaders.",
+      },
+      {
+        problem: "I’ve noticed dark streets feel unsafe.",
+        solution: "Encourage a resident-led safety audit.",
+      },
     ],
     "Public Transport & Roads - (Transport access, road maintenance, reliability)": [
       {
@@ -302,6 +422,18 @@ export default function Home() {
       {
         problem: "Rural areas lack decent transport links.",
         solution: "Advocate for better rural bus routes.",
+      },
+      {
+        problem: "I’ve missed work due to late buses.",
+        solution: "Propose a commuter feedback system for schedules.",
+      },
+      {
+        problem: "In my town, potholes ruined my car tires.",
+        solution: "Suggest a community pothole reporting map.",
+      },
+      {
+        problem: "I’ve seen no buses to my village.",
+        solution: "Encourage a carpool network for rural residents.",
       },
     ],
     "Environment - (Sustainability, pollution, green spaces)": [
@@ -317,9 +449,21 @@ export default function Home() {
         problem: "Litter is piling up in our community.",
         solution: "Support more clean-up efforts and bins locally.",
       },
+      {
+        problem: "I’ve noticed smog affecting my breathing.",
+        solution: "Propose a community air quality monitoring project.",
+      },
+      {
+        problem: "In my area, a park is being built over.",
+        solution: "Suggest a petition to redesignate it as protected.",
+      },
+      {
+        problem: "I’ve seen rubbish overflow near my street.",
+        solution: "Encourage a local litter swap initiative.",
+      },
     ],
   };
-
+  
   const getProblemPlaceholder = (issue: string) => {
     switch (issue) {
       case "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)":
