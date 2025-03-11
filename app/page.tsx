@@ -133,7 +133,6 @@ export default function Home() {
   const [emailSent, setEmailSent] = useState<boolean>(false);
   const [showLegalReminder, setShowLegalReminder] = useState<boolean>(false);
   const [suggestionIndex, setSuggestionIndex] = useState<number>(0);
-  const [showTidyPopup, setShowTidyPopup] = useState(false); // New state for tidy popup
   const tidiedLetterRef = useRef<HTMLPreElement | HTMLTextAreaElement>(null);
 
   const issueOptions = [
