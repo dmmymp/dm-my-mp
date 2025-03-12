@@ -169,7 +169,7 @@ export default function Home() {
   const [mpStats, setMpStats] = useState<MPStats | null>(null);
 
   // Mock data for infographic (replace with API fetch in production)
-  const fetchMpStats = (mpName: string) => {
+  const fetchMpStats = () => {
     // Mock data for demonstration
     const mockStats: MPStats = {
       votingRecord: [
@@ -741,7 +741,7 @@ Email: ${formData.userEmail}
 
   useEffect(() => {
     if (mpDetails) {
-      fetchMpStats(mpDetails.name); // Fetch MP stats when MP details are loaded
+      fetchMpStats(); // Fetch MP stats when MP details are loaded
     }
   }, [mpDetails]);
 
@@ -1381,7 +1381,7 @@ Yours sincerely,
                 {showMpStats && mpStats && (
                   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded shadow-lg dark:bg-gray-800 max-w-lg overflow-y-auto h-[90vh]">
-                      <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">{mpDetails.name}'s Parliamentary Activity</h3>
+                      <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">{mpDetails.name}&apos;s Parliamentary Activity</h3>
                       <div className="mb-6">
                         <h4 className="text-md font-medium mb-2 text-black dark:text-white">Voting Interests (Compared to Averages)</h4>
                         <ul className="space-y-2">
