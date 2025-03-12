@@ -22,7 +22,7 @@ export default function Insights() {
   return (
     <div className="container mx-auto p-6 bg-white dark:bg-gray-900 min-h-screen">
       <h1 className="text-2xl font-bold mb-4 text-black dark:text-white text-center">
-        Constituency Insights (See What Your Neighbours Care About)
+        Constituency Insights (See What My Neighbours Care About)
       </h1>
       <p className="text-gray-700 mb-6 dark:text-gray-300 text-center">
         (Demo only - no data is being collected and analysed yet) Anonymized concerns from letters sent by constituents. Data reflects opt-in submissions across UK constituencies.

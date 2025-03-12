@@ -4,6 +4,19 @@ import React, { useState, useEffect, useRef } from "react";
 import html2canvas from "html2canvas";
 import Link from "next/link";
 import Head from "next/head";
+import { Bar } from "react-chartjs-2"; // Import Chart.js for infographic
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 type MPDetails = {
   name: string;
@@ -26,6 +39,21 @@ type FormData = {
   personalProblem: string;
   personalSolution: string;
   consent: boolean;
+};
+
+// Mock data type for MP stats (replace with API data later)
+type MPStats = {
+  votingRecord: { topic: string; votes: number }[];
+  expenseClaims: number; // In GBP
+  voteAttendance: number; // Percentage
+  rebelliousVotes: number; // Number of rebellious votes
+};
+
+// Mock data type for neighbour issues (replace with API data later)
+type NeighbourIssue = {
+  issue: string;
+  localConcern: number; // Percentage of constituents concerned
+  nationalConcern: number; // National average percentage
 };
 
 const InputField = ({
@@ -133,7 +161,157 @@ export default function Home() {
   const [emailSent, setEmailSent] = useState<boolean>(false);
   const [showLegalReminder, setShowLegalReminder] = useState<boolean>(false);
   const [suggestionIndex, setSuggestionIndex] = useState<number>(0);
+  const [showMpStats, setShowMpStats] = useState<boolean>(false); // State for MP stats modal
+  const [showNeighbourIssues, setShowNeighbourIssues] = useState<boolean>(false); // State for neighbour issues modal
   const tidiedLetterRef = useRef<HTMLPreElement | HTMLTextAreaElement>(null);
+
+  // Mock MP stats (replace with API data later)
+  const [mpStats, setMpStats] = useState<MPStats | null>(null);
+
+  // Mock data for infographic (replace with API fetch in production)
+  const fetchMpStats = (mpName: string) => {
+    // Mock data for demonstration
+    const mockStats: MPStats = {
+      votingRecord: [
+        { topic: "Environment", votes: 20 }, // Higher than average
+        { topic: "Healthcare", votes: 10 }, // Lower than average
+        { topic: "Education", votes: 15 }, // Moderate
+        { topic: "Economy", votes: 18 }, // Higher than average
+      ],
+      expenseClaims: 7500, // In GBP
+      voteAttendance: 70, // Percentage
+      rebelliousVotes: 5, // Number of rebellious votes
+    };
+    setMpStats(mockStats);
+  };
+
+  // Traffic light system for voting interests
+  const getTrafficLight = (votes: number, nationalAvg: number, partyAvg: number) => {
+    const avg = (nationalAvg + partyAvg) / 2;
+    if (votes > avg * 1.25) return "🟢 High"; // Green: >125% of average
+    if (votes < avg * 0.75) return "🔴 Low"; // Red: <75% of average
+    return "🟠 Moderate"; // Amber: Between 75% and 125%
+  };
+
+  // Voting record data with traffic lights
+  const votingRecordData = mpStats?.votingRecord.map((record) => {
+    const nationalAvg = 12; // Mock national average votes per topic
+    const partyAvg = 14; // Mock party average votes per topic
+    return {
+      topic: record.topic,
+      votes: record.votes,
+      status: getTrafficLight(record.votes, nationalAvg, partyAvg),
+    };
+  }) || [];
+
+  // Voting attendance chart data
+  const attendanceChartData = {
+    labels: ["Vote Attendance (%)"],
+    datasets: [
+      {
+        label: `${mpDetails?.name}`,
+        data: [mpStats?.voteAttendance || 0],
+        backgroundColor: "rgba(75, 192, 192, 0.6)",
+      },
+      {
+        label: "Party Average",
+        data: [80], // Mock party average (e.g., 80%)
+        backgroundColor: "rgba(255, 206, 86, 0.6)",
+      },
+      {
+        label: "National Average",
+        data: [74.3], // From Guardian 2011 data (100% - 25.7% absence rate)
+        backgroundColor: "rgba(200, 200, 200, 0.6)",
+      },
+    ],
+  };
+
+  // Expense claims chart data
+  const expenseChartData = {
+    labels: ["Expense Claims (GBP)"],
+    datasets: [
+      {
+        label: `${mpDetails?.name}`,
+        data: [mpStats?.expenseClaims || 0],
+        backgroundColor: "rgba(255, 99, 132, 0.6)",
+      },
+      {
+        label: "Party Average",
+        data: [7200], // Mock party average
+        backgroundColor: "rgba(255, 206, 86, 0.6)",
+      },
+      {
+        label: "National Average",
+        data: [6903], // From GoSimpleTax 2019-2020 report
+        backgroundColor: "rgba(200, 200, 200, 0.6)",
+      },
+    ],
+  };
+
+  // Rebellious votes chart data
+  const rebelliousVotesChartData = {
+    labels: ["Rebellious Votes"],
+    datasets: [
+      {
+        label: `${mpDetails?.name}`,
+        data: [mpStats?.rebelliousVotes || 0],
+        backgroundColor: "rgba(153, 102, 255, 0.6)",
+      },
+      {
+        label: "Party Average",
+        data: [3], // Mock party average
+        backgroundColor: "rgba(255, 206, 86, 0.6)",
+      },
+      {
+        label: "National Average",
+        data: [4], // Mock national average
+        backgroundColor: "rgba(200, 200, 200, 0.6)",
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+      },
+    },
+  };
+
+  // Mock neighbour issues with national averages (demo only)
+  const neighbourIssues: NeighbourIssue[] = [
+    { issue: "Cost of Living", localConcern: 65, nationalConcern: 50 },
+    { issue: "Healthcare", localConcern: 55, nationalConcern: 45 },
+    { issue: "Housing", localConcern: 40, nationalConcern: 35 },
+    { issue: "Environment", localConcern: 30, nationalConcern: 25 },
+    { issue: "Public Transport", localConcern: 25, nationalConcern: 30 },
+  ];
+
+  // Neighbour issues chart data
+  const neighbourIssuesChartData = {
+    labels: neighbourIssues.map((item) => item.issue),
+    datasets: [
+      {
+        label: "Local Concern (%)",
+        data: neighbourIssues.map((item) => item.localConcern),
+        backgroundColor: "rgba(54, 162, 235, 0.6)",
+      },
+      {
+        label: "National Average (%)",
+        data: neighbourIssues.map((item) => item.nationalConcern),
+        backgroundColor: "rgba(200, 200, 200, 0.6)",
+      },
+    ],
+  };
 
   const issueOptions = [
     "Government Overreach - (Free speech restrictions, arrests for criticizing policies, hate speech laws)",
@@ -561,6 +739,12 @@ Email: ${formData.userEmail}
     }
   }, [mpDetails, formData]);
 
+  useEffect(() => {
+    if (mpDetails) {
+      fetchMpStats(mpDetails.name); // Fetch MP stats when MP details are loaded
+    }
+  }, [mpDetails]);
+
   const handleSearch = async () => {
     const postcodeRegex = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
     if (!formData.postcode.trim() || !postcodeRegex.test(formData.postcode.trim())) {
@@ -972,11 +1156,6 @@ Yours sincerely,
                 >
                   {loading ? "Searching..." : "Find My MP"}
                 </button>
-                <Link href="/insights">
-                  <button className="w-full bg-gray-700 text-white p-2 rounded hover:bg-gray-800 dark:bg-purple-600 dark:hover:bg-purple-700">
-                    Top Issues in Your Area (Demo Only)
-                  </button>
-                </Link>
               </div>
               {error && <p className="text-red-500 mt-4 text-center dark:text-red-400">{error}</p>}
             </div>
@@ -1018,6 +1197,18 @@ Yours sincerely,
                     Copy Email
                   </button>
                 </div>
+                <button
+                  onClick={() => setShowMpStats(true)}
+                  className="w-full bg-purple-500 text-white p-2 rounded hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 mb-4"
+                >
+                  See What My MP Cares About
+                </button>
+                <button
+                  onClick={() => setShowNeighbourIssues(true)}
+                  className="w-full bg-gray-700 text-white p-2 rounded hover:bg-gray-800 dark:bg-purple-600 dark:hover:bg-purple-700 mb-4"
+                >
+                  See What My Neighbours Care About
+                </button>
 
                 <h3 className="text-lg font-semibold mt-6 mb-2 text-black dark:text-white">Your Details</h3>
                 <InputField
@@ -1183,6 +1374,89 @@ Yours sincerely,
                           Proceed
                         </button>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {showMpStats && mpStats && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded shadow-lg dark:bg-gray-800 max-w-lg overflow-y-auto h-[90vh]">
+                      <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">{mpDetails.name}'s Parliamentary Activity</h3>
+                      <div className="mb-6">
+                        <h4 className="text-md font-medium mb-2 text-black dark:text-white">Voting Interests (Compared to Averages)</h4>
+                        <ul className="space-y-2">
+                          {votingRecordData.map((item, index) => (
+                            <li key={index} className="text-black dark:text-white">
+                              {item.topic}: {item.votes} votes - {item.status}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="mb-6">
+                        <h4 className="text-md font-medium mb-2 text-black dark:text-white">Vote Attendance</h4>
+                        <Bar
+                          data={attendanceChartData}
+                          options={{
+                            ...chartOptions,
+                            plugins: { ...chartOptions.plugins, title: { display: true, text: "Attendance Comparison (%)" } },
+                          }}
+                        />
+                      </div>
+                      <div className="mb-6">
+                        <h4 className="text-md font-medium mb-2 text-black dark:text-white">Expense Claims</h4>
+                        <Bar
+                          data={expenseChartData}
+                          options={{
+                            ...chartOptions,
+                            plugins: { ...chartOptions.plugins, title: { display: true, text: "Expenses Comparison (GBP)" } },
+                          }}
+                        />
+                      </div>
+                      <div className="mb-6">
+                        <h4 className="text-md font-medium mb-2 text-black dark:text-white">Rebellious Votes</h4>
+                        <Bar
+                          data={rebelliousVotesChartData}
+                          options={{
+                            ...chartOptions,
+                            plugins: { ...chartOptions.plugins, title: { display: true, text: "Rebellious Votes Comparison" } },
+                          }}
+                        />
+                      </div>
+                      <p className="text-gray-600 text-sm mb-4 dark:text-gray-400">
+                        Data is for demonstration purposes. Voting interests use a traffic light system (Green: High, Amber: Moderate, Red: Low) compared to party/national averages. Attendance, expenses, and rebellious votes are compared to party and national averages.
+                      </p>
+                      <button
+                        onClick={() => setShowMpStats(false)}
+                        className="w-full bg-gray-300 text-black p-2 rounded hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {showNeighbourIssues && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded shadow-lg dark:bg-gray-800 max-w-lg overflow-y-auto h-[90vh]">
+                      <h3 className="text-lg font-semibold mb-4 text-black dark:text-white">Top Issues My Neighbours Care About</h3>
+                      <div className="mb-6">
+                        <Bar
+                          data={neighbourIssuesChartData}
+                          options={{
+                            ...chartOptions,
+                            plugins: { ...chartOptions.plugins, title: { display: true, text: "Local vs National Concern (%)" } },
+                          }}
+                        />
+                      </div>
+                      <p className="text-gray-600 text-sm mt-4 mb-4 dark:text-gray-400">
+                        This is a demo feature based on common UK constituency concerns. Local concern levels are compared to national averages. Real data would require local surveys or API integration.
+                      </p>
+                      <button
+                        onClick={() => setShowNeighbourIssues(false)}
+                        className="w-full bg-gray-300 text-black p-2 rounded hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+                      >
+                        Close
+                      </button>
                     </div>
                   </div>
                 )}
