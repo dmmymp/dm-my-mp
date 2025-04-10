@@ -118,22 +118,106 @@ const TextAreaField = ({
 );
 
 const ProgressIndicator = ({ currentStep }: { currentStep: number }) => (
-  <div className="flex justify-center mb-6 text-sm font-bold text-gray-700 dark:text-gray-300 bg-gray-100 p-2 rounded-lg shadow-md">
-    <div className="flex items-center">
-      <span className={`mr-2 font-bold ${currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
-        1. Find MP <span className="text-xs italic font-normal">(Enter your postcode)</span>
+  <div className="flex items-center justify-center mb-6 gap-2 sm:gap-4">
+    {/* Step 1: Find MP */}
+    <div className="flex flex-col items-center">
+      <div
+        className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all duration-300 ${
+          currentStep >= 1 ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
+        }`}
+        aria-label={`Step 1: Find MP (Enter your postcode)${currentStep >= 1 ? " (Active)" : ""}`}
+      >
+        <svg
+          className="w-4 h-4 sm:w-5 sm:h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      </div>
+      <span
+        className={`mt-1 text-xs sm:text-sm font-medium text-center ${
+          currentStep >= 1 ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+        }`}
+      >
+        Find MP (Enter your postcode)
       </span>
-      <span className="mr-2 dark:text-gray-300">{">"}</span>
-      <span className={`mr-2 font-bold ${currentStep >= 2 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
-        2. Write Message <span className="text-xs italic font-normal">(Fill all boxes)</span>
+    </div>
+
+    {/* Step 2: Write Message */}
+    <div className="flex flex-col items-center">
+      <div
+        className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all duration-300 ${
+          currentStep >= 2 ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
+        }`}
+        aria-label={`Step 2: Write Message (Fill the boxes)${currentStep >= 2 ? " (Active)" : ""}`}
+      >
+        <svg
+          className="w-4 h-4 sm:w-5 sm:h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+          />
+        </svg>
+      </div>
+      <span
+        className={`mt-1 text-xs sm:text-sm font-medium text-center ${
+          currentStep >= 2 ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+        }`}
+      >
+        Write Message (Fill in boxes)
       </span>
-      <span className="mr-2 dark:text-gray-300">{">"}</span>
-      <span className={`font-bold ${currentStep >= 3 ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"}`}>
-        3. Send <span className="text-xs italic font-normal">(Tidy & email/share)</span>
+    </div>
+
+{/* Step 3: Send */}
+<div className="flex flex-col items-center">
+      <div
+        className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full transition-all duration-300 ${
+          currentStep >= 3 ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
+        }`}
+        aria-label={`Step 3: Send (Tidy and email/share)${currentStep >= 3 ? " (Active)" : ""}`}
+      >
+        <svg
+          className="w-4 h-4 sm:w-5 sm:h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      
+          />
+        </svg>
+      </div>
+      <span
+        className={`mt-1 text-xs sm:text-sm font-medium text-center ${
+          currentStep >= 3 ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400"
+        }`}
+      >
+        Send (Tidy and email/share)
       </span>
     </div>
   </div>
 );
+
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData>({
@@ -912,7 +996,7 @@ Email: ${formData.userEmail}
     );
 
     const sanitizedLetter = `
-Dear ${mpDetails?.name ?? "MP"},
+
 
 ${bodyLines.join("\n").trim()}
 
