@@ -1,7 +1,9 @@
+
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import { parse } from "csv-parse/sync";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 
 // Define the interface for the MP data structure
 interface MPRecord {
@@ -17,7 +19,38 @@ interface MPRecord {
   Postcode: string;
 }
 
+// Rate limiter: max 5 requests per IP per hour
+const rateLimiter = new RateLimiterMemory({
+  points: 5,
+  duration: 3600, // 1 hour
+});
+
 export async function GET(req: NextRequest): Promise<NextResponse> {
+  // Apply rate limiting
+  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  try {
+    await rateLimiter.consume(ip);
+  } catch (error) {
+    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+  }
+
+  // Verify reCAPTCHA token
+  const recaptchaToken = req.headers.get("X-Recaptcha-Token");
+  if (!recaptchaToken) {
+    return NextResponse.json({ error: "reCAPTCHA token missing" }, { status: 400 });
+  }
+
+  const recaptchaResponse = await fetch(
+    `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`,
+    { method: "POST" }
+  );
+  const recaptchaData = await recaptchaResponse.json();
+
+  if (!recaptchaData.success || recaptchaData.score < 0.5) {
+    return NextResponse.json({ error: "reCAPTCHA verification failed" }, { status: 403 });
+  }
+
+  // Existing logic for fetching MP data
   const { searchParams } = new URL(req.url);
   const postcode = searchParams.get("postcode")?.toUpperCase().replace(/\s/g, "");
 

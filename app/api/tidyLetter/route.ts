@@ -1,6 +1,40 @@
+
 import { NextRequest, NextResponse } from "next/server";
+import { RateLimiterMemory } from "rate-limiter-flexible";
+
+// Rate limiter: max 5 requests per IP per hour
+const rateLimiter = new RateLimiterMemory({
+  points: 5,
+  duration: 3600, // 1 hour
+});
 
 export async function POST(req: NextRequest) {
+  // Apply rate limiting
+  const ip = req.headers.get("x-forwarded-for") || "unknown";
+  try {
+    await rateLimiter.consume(ip);
+  } catch (error) {
+    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
+  }
+
+  // Optional: Add reCAPTCHA verification if desired
+  /*
+  const recaptchaToken = req.headers.get("X-Recaptcha-Token");
+  if (!recaptchaToken) {
+    return NextResponse.json({ error: "reCAPTCHA token missing" }, { status: 400 });
+  }
+
+  const recaptchaResponse = await fetch(
+    `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`,
+    { method: "POST" }
+  );
+  const recaptchaData = await recaptchaResponse.json();
+
+  if (!recaptchaData.success || recaptchaData.score < 0.5) {
+    return NextResponse.json({ error: "reCAPTCHA verification failed" }, { status: 403 });
+  }
+  */
+
   try {
     const { letter, name, address, email } = await req.json();
 
@@ -14,7 +48,7 @@ export async function POST(req: NextRequest) {
     const header = `\n${new Date().toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })}\n\n`;
     const closing = `\n\n`;
 
-    const prompt = `You are a professional editor assisting a constituent. Rephrase the following letter to be simple, concise, polite, and professional, suitable for addressing a Member of Parliament. Use formal language, keep short, remove unnecessary words. Focus only on the body of the letter. Include an appropriate salutation as they appear in the original letter') based on the context of the original letter.
+    const prompt = `You are a professional editor assisting a constituent. Rephrase the following letter to be simple, concise, polite, and professional, suitable for addressing a Member of Parliament. Use formal language, keep short, remove unnecessary words. Focus only on the body of the letter. Include an appropriate salutation as they appear in the original letter based on the context of the original letter.
 
     Original Letter:
     ${letter}
@@ -92,8 +126,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-} 
-
-
-
-
+}
