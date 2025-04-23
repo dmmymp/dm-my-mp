@@ -6,6 +6,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import MpOverview from "./MpOverview";
 
 interface MpData {
+  error: any;
   name: string;
   constituency: string;
   party: string;
@@ -14,6 +15,7 @@ interface MpData {
 }
 
 interface MpStatsData {
+  error: any;
   mpId: string;
   votingRecord: { topic: string; votes: number }[];
   rebelliousVotes: number;
