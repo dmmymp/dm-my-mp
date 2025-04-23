@@ -36,8 +36,7 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "types/**/*.d.ts",
-    "app/types/**/*.d.ts" // Added to explicitly include /app/types
+    "app/types/**/*.d.ts" // Explicitly include .d.ts files in /app/types/
   ],
   "exclude": [
     "node_modules"
