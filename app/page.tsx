@@ -320,7 +320,8 @@ export default function Home() {
   const [isLoadingMpStats, setIsLoadingMpStats] = useState<boolean>(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null); // Added for reCAPTCHA
   const [showEmailConfirmation, setShowEmailConfirmation] = useState<boolean>(false); // Added for email confirmation popup
-  const tidiedLetterRef = useRef<HTMLPreElement | HTMLTextAreaElement>(null);
+  const tidiedLetterPreRef = useRef<HTMLPreElement>(null);
+  const tidiedLetterTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [mpStats, setMpStats] = useState<MPStats | null>(null);
   const [startYear, setStartYear] = useState<number | null>(null);
 
@@ -597,7 +598,7 @@ const confirmEmailYourMP = async () => {
   };
 
   const generateScreenshot = async () => {
-    if (!tidiedLetterRef.current || !tidiedLetter) return null;
+    if (!tidiedLetterPreRef.current || !tidiedLetter) return null;
     const letterToSanitize = isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter;
     console.log("Current Tidied Message State:", letterToSanitize);
     const sanitizedLetterLines = letterToSanitize.split("\n");
@@ -626,27 +627,27 @@ const confirmEmailYourMP = async () => {
         !line.toLowerCase().startsWith("i appreciate your attention to this matter and look forward to")
     );
     const sanitizedLetter = `
-Dear ${mpDetails?.name ?? "MP"},
-
-${bodyLines.join("\n").trim()}
-
-Yours sincerely,
-[Name omitted]
-    `.trim();
-    const originalContent = tidiedLetterRef.current.innerText;
-    tidiedLetterRef.current.innerText = sanitizedLetter;
+  Dear ${mpDetails?.name ?? "MP"},
+  
+  ${bodyLines.join("\n").trim()}
+  
+  Yours sincerely,
+  [Name omitted]
+      `.trim();
+    const originalContent = tidiedLetterPreRef.current.innerText;
+    tidiedLetterPreRef.current.innerText = sanitizedLetter;
     await new Promise((resolve) => setTimeout(resolve, 2500));
     let attempts = 0;
     const maxAttempts = 10;
-    while (attempts < maxAttempts && tidiedLetterRef.current?.innerText !== sanitizedLetter) {
-      console.log(`Attempt ${attempts + 1}: Tidied Message Ref`, tidiedLetterRef.current?.innerText);
+    while (attempts < maxAttempts && tidiedLetterPreRef.current?.innerText !== sanitizedLetter) {
+      console.log(`Attempt ${attempts + 1}: Tidied Message Ref`, tidiedLetterPreRef.current?.innerText);
       await new Promise((resolve) => setTimeout(resolve, 250));
       attempts++;
     }
-    console.log("Tidied Message Ref Before Screenshot (Final):", tidiedLetterRef.current?.innerText);
+    console.log("Tidied Message Ref Before Screenshot (Final):", tidiedLetterPreRef.current?.innerText);
     console.log("Sanitized Message:", sanitizedLetter);
     try {
-      const canvas = await html2canvas(tidiedLetterRef.current, {
+      const canvas = await html2canvas(tidiedLetterPreRef.current, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
@@ -674,11 +675,11 @@ Yours sincerely,
           "image/png": blob,
         }),
       ]);
-      tidiedLetterRef.current.innerText = originalContent;
+      tidiedLetterPreRef.current.innerText = originalContent;
       return { blob, sanitizedLetter };
     } catch (err) {
       console.error("Failed to generate screenshot or copy to clipboard:", err);
-      tidiedLetterRef.current.innerText = originalContent;
+      tidiedLetterPreRef.current.innerText = originalContent;
       throw err;
     }
   };
@@ -1319,69 +1320,75 @@ Yours sincerely,
                   </div>
                 )}
               </div>
+
               {tidiedLetter && (
-                <div className="p-4 border rounded bg-gray-100 text-black dark:bg-gray-800 dark:text-white dark:border-gray-700">
-                  <h3 className="text-lg font-semibold mb-2">Tidied Message</h3>
-                  {isEditingTidiedLetter ? (
-                    <textarea
-                      value={editedTidiedLetter}
-                      onChange={(e) => handleEditedTidiedLetterChange(e.target.value)}
-                      className="w-full p-4 border rounded bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700 min-h-[300px] whitespace-pre-wrap"
-                    />
-                  ) : (
-                    <pre ref={tidiedLetterRef} className="p-4 border rounded bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700 whitespace-pre-wrap">
-                      {tidiedLetter}
-                    </pre>
-                  )}
-                  <div className="flex gap-2 mt-4">
-                    <button
-                      onClick={handleEditToggle}
-                      className="w-1/2 bg-yellow-500 text-black p-2 rounded hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:text-white"
-                    >
-                      {isEditingTidiedLetter ? "Save Changes" : "Edit Message"}
-                    </button>
-                    <button
-                      onClick={() => handleCopyToClipboard(isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter)}
-                      className="w-1/2 bg-gray-300 text-black p-2 rounded hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
-                    >
-                      Copy to Clipboard
-                    </button>
-                  </div>
-                  <button
-                    onClick={handleEmailYourMP}
-                    className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={isEditingTidiedLetter || !liabilityConsent}
-                  >
-                    Email My MP
-                  </button>
-                  {emailSent && (
-                    <p className="text-green-500 mt-2 text-center dark:text-green-400">
-                      Your email has been opened for sending. Note that MPs may not respond immediately, and response times vary.{" "}
-                      <Link href="/faq" className="text-blue-600 hover:underline dark:text-blue-400">
-                        Learn more in our FAQ.
-                      </Link>
-                    </p>
-                  )}
-                  <button
-                    onClick={handleShareOnFacebook}
-                    className="w-full bg-blue-700 text-white p-2 rounded hover:bg-blue-800 dark:bg-blue-800 dark:hover:bg-blue-900 mt-4"
-                  >
-                    Share on Facebook
-                  </button>
-                  <button
-                    onClick={handleShareOnX}
-                    className="w-full bg-gray-900 text-white p-2 rounded hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 mt-4"
-                  >
-                    Share on X
-                  </button>
-                  <button
-                    onClick={handleShareOnLinkedIn}
-                    className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 mt-4"
-                  >
-                    Share on LinkedIn
-                  </button>
-                </div>
-              )}
+  <div className="p-4 border rounded bg-gray-100 text-black dark:bg-gray-800 dark:text-white dark:border-gray-700">
+    <h3 className="text-lg font-semibold mb-2">Tidied Message</h3>
+    {isEditingTidiedLetter ? (
+      <textarea
+        ref={tidiedLetterTextareaRef}
+        value={editedTidiedLetter}
+        onChange={(e) => handleEditedTidiedLetterChange(e.target.value)}
+        className="w-full p-4 border rounded bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700 min-h-[300px] whitespace-pre-wrap"
+      />
+    ) : (
+      <pre
+        ref={tidiedLetterPreRef}
+        className="p-4 border rounded bg-white text-black dark:bg-gray-800 dark:text-white dark:border-gray-700 whitespace-pre-wrap"
+      >
+        {tidiedLetter}
+      </pre>
+    )}
+    <div className="flex gap-2 mt-4">
+      <button
+        onClick={handleEditToggle}
+        className="w-1/2 bg-yellow-500 text-black p-2 rounded hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 dark:text-white"
+      >
+        {isEditingTidiedLetter ? "Save Changes" : "Edit Message"}
+      </button>
+      <button
+        onClick={() => handleCopyToClipboard(isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter)}
+        className="w-1/2 bg-gray-300 text-black p-2 rounded hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+      >
+        Copy to Clipboard
+      </button>
+    </div>
+    <button
+      onClick={handleEmailYourMP}
+      className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
+      disabled={isEditingTidiedLetter || !liabilityConsent}
+    >
+      Email My MP
+    </button>
+    {emailSent && (
+      <p className="text-green-500 mt-2 text-center dark:text-green-400">
+        Your email has been opened for sending. Note that MPs may not respond immediately, and response times vary.{" "}
+        <Link href="/faq" className="text-blue-600 hover:underline dark:text-blue-400">
+          Learn more in our FAQ.
+        </Link>
+      </p>
+    )}
+    <button
+      onClick={handleShareOnFacebook}
+      className="w-full bg-blue-700 text-white p-2 rounded hover:bg-blue-800 dark:bg-blue-800 dark:hover:bg-blue-900 mt-4"
+    >
+      Share on Facebook
+    </button>
+    <button
+      onClick={handleShareOnX}
+      className="w-full bg-gray-900 text-white p-2 rounded hover:bg-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 mt-4"
+    >
+      Share on X
+    </button>
+    <button
+      onClick={handleShareOnLinkedIn}
+      className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 mt-4"
+    >
+      Share on LinkedIn
+    </button>
+  </div>
+)}
+
             </div>
 
             {mpDetails && mpStats && showMpStats && (
