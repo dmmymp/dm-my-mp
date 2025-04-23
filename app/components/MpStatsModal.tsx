@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
 type EngagementMetric = {
@@ -138,7 +139,7 @@ export default function MpStatsModal({ isOpen, onClose, mp, stats, startYear, ne
 
   let alignmentText = "unknown";
   let alignmentColor = "amber";
-  if (neighbourIssues?.length && stats.topVotingTopics) {
+  if (neighbourIssues && neighbourIssues.length > 0 && stats.topVotingTopics) {
     const topLocalIssue = neighbourIssues[0].issue.toLowerCase();
     const relatedTopic = stats.topVotingTopics.find(topic => topic.description.toLowerCase().includes(topLocalIssue));
     alignmentText = relatedTopic && (relatedTopic.votesFor + relatedTopic.votesAgainst) > 0 ? "active" : "limited";
@@ -216,7 +217,7 @@ export default function MpStatsModal({ isOpen, onClose, mp, stats, startYear, ne
               Local Engagement: {stats.parliamentaryActivity?.constituencyMentions || 0} mentions of {mp.constituency} ({localEngagementText} focus{' '}
               <span style={{ color: colorStyles[localEngagementColor].color }}>({colorStyles[localEngagementColor].label})</span>)
             </p>
-            {neighbourIssues?.length > 0 && (
+            {neighbourIssues && neighbourIssues.length > 0 && (
               <p>
                 Constituency Alignment: Voting on {neighbourIssues[0].issue} is {alignmentText}{' '}
                 <span style={{ color: colorStyles[alignmentColor].color }}>({colorStyles[alignmentColor].label})</span>
