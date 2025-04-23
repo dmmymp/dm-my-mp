@@ -28,6 +28,22 @@ interface MpStatsData {
 }
 
 const MpStatsPage: React.FC = () => {
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  if (!siteKey) {
+    if (process.env.NODE_ENV === "development") {
+      throw new Error("NEXT_PUBLIC_RECAPTCHA_SITE_KEY is not set in environment variables");
+    }
+    return (
+      <div className="p-6 font-sans text-gray-900 bg-white min-h-screen">
+        <h1 className="text-2xl font-bold mb-2">Send a DM to Your MP - Beta</h1>
+        <p className="mb-6 text-sm">This is a beta version—please report issues to feedback.</p>
+        <p className="text-red-500">
+          reCAPTCHA configuration error. Please contact support.
+        </p>
+      </div>
+    );
+  }
+
   const [mp, setMp] = useState<MpData | null>(null);
   const [mpStats, setMpStats] = useState<MpStatsData | null>(null);
   const [postcode, setPostcode] = useState<string>("");
@@ -91,7 +107,7 @@ const MpStatsPage: React.FC = () => {
 
       <div className="mb-6">
         <ReCAPTCHA
-          sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "your-site-key-here"}
+          sitekey={siteKey}
           onChange={handleRecaptchaVerify}
         />
       </div>
