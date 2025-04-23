@@ -37,6 +37,13 @@ type NeighbourIssue = {
   nationalConcern: number;
 };
 
+type ColorKey = "green" | "amber" | "red";
+
+type ColorStyle = {
+  color: string;
+  label: string;
+};
+
 type MpStatsModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -80,7 +87,7 @@ type MpStatsModalProps = {
 export default function MpStatsModal({ isOpen, onClose, mp, stats, startYear, neighbourIssues }: MpStatsModalProps) {
   console.log("MpStatsModal rendered, isOpen:", isOpen, "mp:", mp, "stats:", stats, "startYear:", startYear, "neighbourIssues:", neighbourIssues);
 
-  const colorStyles = {
+  const colorStyles: Record<ColorKey, ColorStyle> = {
     green: { color: "#00cc00", label: "High" },
     amber: { color: "#ffaa00", label: "Moderate" },
     red: { color: "#cc0000", label: "Low" },
@@ -134,11 +141,11 @@ export default function MpStatsModal({ isOpen, onClose, mp, stats, startYear, ne
   }
 
   const engagementLevel = stats.overallSummary?.summary.match(/appears (\w+ \w+)/)?.[1] || "moderately engaged";
-  const localEngagementColor = stats.profileSummary.localReferences.color;
+  const localEngagementColor: ColorKey = stats.profileSummary.localReferences.color;
   const localEngagementText = colorStyles[localEngagementColor].label;
 
-  let alignmentText = "unknown";
-  let alignmentColor = "amber";
+  let alignmentText: string = "unknown";
+  let alignmentColor: ColorKey = "amber";
   if (neighbourIssues && neighbourIssues.length > 0 && stats.topVotingTopics) {
     const topLocalIssue = neighbourIssues[0].issue.toLowerCase();
     const relatedTopic = stats.topVotingTopics.find(topic => topic.description.toLowerCase().includes(topLocalIssue));
