@@ -6,7 +6,6 @@ import ReCAPTCHA from "react-google-recaptcha";
 import MpOverview from "./MpOverview";
 
 interface MpData {
-  error: any;
   name: string;
   constituency: string;
   party: string;
@@ -14,8 +13,9 @@ interface MpData {
   image?: string | null;
 }
 
+type MpApiResponse = MpData | { error: string };
+
 interface MpStatsData {
-  error: any;
   mpId: string;
   votingRecord: { topic: string; votes: number }[];
   rebelliousVotes: number;
@@ -28,6 +28,8 @@ interface MpStatsData {
   newMpMessage: string | null;
   ministerialRoles: { name: string; department: string; startDate: string; endDate: string | null }[];
 }
+
+type MpStatsApiResponse = MpStatsData | { error: string };
 
 const MpStatsPage: React.FC = () => {
   const [mp, setMp] = useState<MpData | null>(null);
@@ -54,16 +56,16 @@ const MpStatsPage: React.FC = () => {
         },
       });
       if (!mpResponse.ok) throw new Error(`Failed to fetch MP data: ${mpResponse.status} ${mpResponse.statusText}`);
-      const mpData: MpData = await mpResponse.json();
-      if (mpData.error) throw new Error(mpData.error);
+      const mpData: MpApiResponse = await mpResponse.json();
+      if ("error" in mpData) throw new Error(mpData.error);
       setMp(mpData);
 
       const statsResponse = await fetch(
         `/api/fetchMpStats?name=${encodeURIComponent(mpData.name)}&constituency=${encodeURIComponent(mpData.constituency)}`
       );
       if (!statsResponse.ok) throw new Error(`Failed to fetch MP stats: ${statsResponse.status} ${mpResponse.statusText}`);
-      const statsData: MpStatsData = await statsResponse.json();
-      if (statsData.error) throw new Error(statsData.error);
+      const statsData: MpStatsApiResponse = await statsResponse.json();
+      if ("error" in statsData) throw new Error(statsData.error);
       setMpStats(statsData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred");
