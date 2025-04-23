@@ -1,6 +1,8 @@
-const { pgTable, serial, text, timestamp } = require("drizzle-orm/pg-core");
 
-exports.letters = pgTable("letters", {
+import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+
+// Define the letters table schema
+export const letters = pgTable("letters", {
   id: serial("id").primaryKey(),
   postcode: text("postcode").notNull(),
   issue: text("issue").notNull(),
