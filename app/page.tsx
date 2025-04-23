@@ -25,6 +25,9 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 // reCAPTCHA site key for bot protection
 const RECAPTCHA_SITE_KEY="6Ldv3CErAAAAAKdyUdc81tDy9FL8ouCLRDSle3dI" ; 
+
+
+
 type MPDetails = {
   name: string;
   party: string;
@@ -321,27 +324,49 @@ export default function Home() {
   const [mpStats, setMpStats] = useState<MPStats | null>(null);
   const [startYear, setStartYear] = useState<number | null>(null);
 
-  // Load reCAPTCHA script and generate token
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
-    script.async = true;
-    document.body.appendChild(script);
+ // Load reCAPTCHA script and generate token
+ useEffect(() => {
+  if (!RECAPTCHA_SITE_KEY) {
+    console.error("reCAPTCHA site key is not set in environment variables");
+    setError("reCAPTCHA configuration error. Please contact support.");
+    return;
+  }
 
-    script.onload = () => {
+  const script = document.createElement("script");
+  script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
+  script.async = true;
+  document.body.appendChild(script);
+
+  script.onload = () => {
+    if (window.grecaptcha) {
       window.grecaptcha.ready(() => {
         window.grecaptcha
           .execute(RECAPTCHA_SITE_KEY, { action: "submit" })
           .then((token: string) => {
             setRecaptchaToken(token);
+          })
+          .catch((err: Error) => {
+            console.error("reCAPTCHA execute error:", err);
+            setError("Failed to verify reCAPTCHA. Please try again.");
           });
       });
-    };
+    } else {
+      console.error("grecaptcha not available after script load");
+      setError("reCAPTCHA failed to load. Please try again.");
+    }
+  };
 
-    return () => {
+  script.onerror = () => {
+    console.error("Failed to load reCAPTCHA script");
+    setError("Failed to load reCAPTCHA script. Please check your connection.");
+  };
+
+  return () => {
+    if (document.body.contains(script)) {
       document.body.removeChild(script);
-    };
-  }, []);
+    }
+  };
+}, []);
 
   useEffect(() => {
     console.log('showMpStats changed:', showMpStats);
