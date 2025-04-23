@@ -563,25 +563,34 @@ Email: ${formData.userEmail}
     setShowEmailConfirmation(true); // Show confirmation popup
   };
 
-  const confirmEmailYourMP = async () => {
-    setShowEmailConfirmation(false);
-    const result = await insertLetter({
-      postcode: getOutwardCode(formData.postcode), // Store only outward code
-      issue: formData.issue,
-      customIssue: formData.customIssue,
-      problem: formData.problem,
-      solution: formData.solution,
-      constituency: mpDetails.constituency,
-    });
-    if (!result.success) {
-      setError(result.error || "Failed to save engagement data, but you can still send your email.");
-    }
-    const subject = `Message from constituent regarding ${formData.issue}`;
-    const body = encodeURIComponent(isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter);
-    window.open(`mailto:${mpDetails.email}?subject=${encodeURIComponent(subject)}&body=${body}`, "_blank");
-    setEmailSent(true);
-    setTimeout(() => setEmailSent(false), 5000); // Extended timeout to ensure user sees the message
-  };
+const confirmEmailYourMP = async () => {
+  setShowEmailConfirmation(false);
+
+  // Add null check for mpDetails
+  if (!mpDetails) {
+    setError("MP details are missing. Please search for your MP again.");
+    return;
+  }
+
+  const result = await insertLetter({
+    postcode: getOutwardCode(formData.postcode),
+    issue: formData.issue,
+    customIssue: formData.customIssue,
+    problem: formData.problem,
+    solution: formData.solution,
+    constituency: mpDetails.constituency, // Now safe to access
+  });
+
+  if (!result.success) {
+    setError(result.error || "Failed to save engagement data, but you can still send your email.");
+  }
+
+  const subject = `Message from constituent regarding ${formData.issue}`;
+  const body = encodeURIComponent(isEditingTidiedLetter ? editedTidiedLetter : tidiedLetter);
+  window.open(`mailto:${mpDetails.email}?subject=${encodeURIComponent(subject)}&body=${body}`, "_blank"); // Now safe to access
+  setEmailSent(true);
+  setTimeout(() => setEmailSent(false), 5000);
+};
 
   const handleCopyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
