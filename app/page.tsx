@@ -1392,26 +1392,26 @@ const confirmEmailYourMP = async () => {
             </div>
 
             {mpDetails && mpStats && showMpStats && (
-              <>
-                {console.log('Rendering MpStatsModal, showMpStats:', showMpStats, 'mpDetails:', mpDetails, 'mpStats:', mpStats, 'startYear:', startYear)}
-                <MpStatsModal
-                  isOpen={showMpStats}
-                  onClose={() => {
-                    console.log('MpStatsModal onClose called, setting showMpStats to false');
-                    setShowMpStats(false);
-                  }}
-                  mp={{
-                    name: mpDetails.name,
-                    constituency: mpDetails.constituency,
-                    party: mpDetails.party,
-                    email: mpDetails.email,
-                  }}
-                  stats={mpStats}
-                  startYear={startYear}
-                  neighbourIssues={neighbourIssues}
-                />
-              </>
-            )}
+  <>
+    {console.log('Rendering MpStatsModal, showMpStats:', showMpStats, 'mpDetails:', mpDetails, 'mpStats:', mpStats, 'startYear:', startYear)}
+    <MpStatsModal
+      isOpen={showMpStats}
+      onClose={() => {
+        console.log('MpStatsModal onClose called, setting showMpStats to false');
+        setShowMpStats(false);
+      }}
+      mp={{
+        name: mpDetails.name,
+        constituency: mpDetails.constituency,
+        party: mpDetails.party,
+        email: mpDetails.email,
+      }}
+      stats={mpStats}
+      startYear={startYear ?? undefined} // Convert null to undefined
+      neighbourIssues={neighbourIssues}
+    />
+  </>
+)}
 
             {showNeighbourIssues && engagementData && mpDetails && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
