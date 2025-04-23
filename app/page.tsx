@@ -96,11 +96,7 @@ type MPStats = {
   averageTotalDeclaredInterests: number;
 };
 
-type NeighbourIssue = {
-  issue: string;
-  localConcern: number;
-  nationalConcern: number;
-};
+
 
 type EngagementData = {
   totalLetters: number;
@@ -660,12 +656,13 @@ Yours sincerely,
       const url = window.location.href;
       const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
       window.open(facebookUrl, "_blank", "width=600,height=400");
-    } catch (err) {
-      setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
-      const url = window.location.href;
-      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
-      window.open(facebookUrl, "_blank", "width=600,height=400");
-    }
+
+} catch {
+  setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
+  const url = window.location.href;
+  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+  window.open(facebookUrl, "_blank", "width=600,height=400");
+}
   };
 
   const handleShareOnX = async () => {
@@ -1019,15 +1016,12 @@ Yours sincerely,
 
   return (
     <>
-      <Head>
-        <meta property="og:title" content="DM My MP - Beta" />
-        <meta property="og:description" content="I wrote to my MP in minutes, you can too. Try it ➡️" />
-        <meta property="og:url" content="https://dmmymp.com" />
-        <meta property="og:type" content="website" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
-      </Head>
+<Head>
+  <meta property="og:title" content="DM My MP - Beta" />
+  <meta property="og:description" content="I wrote to my MP in minutes, you can too. Try it ➡️" />
+  <meta property="og:url" content="https://dmmymp.com" />
+  <meta property="og:type" content="website" />
+</Head>
       <div className="container mx-auto p-6 bg-white dark:bg-gray-900">
         {!mpDetails ? (
           <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-900">

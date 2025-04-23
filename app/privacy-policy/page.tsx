@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
         <strong>Last Updated:</strong> 23 April 2025
       </p>
       <p className="text-gray-700 dark:text-gray-300 mb-4">
-        DM My MP ("we", "us", or "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you use our tool to contact your Member of Parliament (MP). By using DM My MP, you agree to the practices described in this policy. If you do not agree, please do not use our service.
+        DM My MP ({"we"}, {"us"}, or {"our"}) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you use our tool to contact your Member of Parliament (MP). By using DM My MP, you agree to the practices described in this policy. If you do not agree, please do not use our service.
       </p>
 
       <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">1. Information We Collect</h2>
@@ -16,7 +16,7 @@ export default function PrivacyPolicy() {
       </p>
       <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4">
         <li><strong>Personal Information for Letter Generation:</strong> When you draft a letter, we collect your full name, address, postcode, and email address. This information is used solely to generate and send your letter to your MP and is not stored after the letter is sent.</li>
-        <li><strong>Anonymized Data for Analysis:</strong> We store anonymized data, including the issue type, problem, solution (if provided), the outward code of your postcode (e.g., "NW1" from "NW1 0DR"), and your MP’s constituency. This data does not include personally identifiable information (PII) such as your name, full address, or email.</li>
+        <li><strong>Anonymized Data for Analysis:</strong> We store anonymized data, including the issue type, problem, solution (if provided), the outward code of your postcode (e.g., {"SW1A"} from {"SW1A 1AA"}), and your MP’s constituency. This data does not include personally identifiable information (PII) such as your name, full address, or email.</li>
         <li><strong>Usage Data:</strong> We may collect technical data such as your IP address, browser type, and usage patterns to improve our service. This data is anonymized and aggregated.</li>
       </ul>
 
@@ -86,7 +86,7 @@ export default function PrivacyPolicy() {
 
       <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">10. Changes to This Privacy Policy</h2>
       <p className="text-gray-700 dark:text-gray-300 mb-4">
-        We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of significant changes by updating the "Last Updated" date at the top of this page. Please review this policy periodically.
+        We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of significant changes by updating the {"Last Updated"} date at the top of this page. Please review this policy periodically.
       </p>
 
       <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">11. Contact Us</h2>

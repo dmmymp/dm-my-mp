@@ -1,3 +1,4 @@
+
 import fetch from "node-fetch";
 
 type VotingRecord = { topic: string; votes: number };
@@ -29,6 +30,52 @@ type FinancialSupport = {
   donationType: string;
 };
 
+// New interfaces for TypeScript
+interface DreamMp {
+  id: string;
+  description: string;
+}
+
+interface Debate {
+  body: string;
+  major: string;
+  htype: string;
+  section: string;
+  hdate: string;
+}
+
+interface FinancialCategory {
+  category_id: string;
+  summaries: {
+    comparable_id: string;
+    details: { slug: string; value: string }[];
+  }[];
+}
+
+interface EnrichedFinancialData {
+  categories: FinancialCategory[];
+}
+
+interface MpData {
+  full_name: string;
+  party: string;
+  person_id: string;
+  member_id: string;
+  office: { position: string; dept?: string }[];
+}
+
+interface MpInfo {
+  maiden_speech?: string;
+  by_member_id?: {
+    [key: string]: {
+      public_whip_division_attendance?: string;
+      public_whip_rebellions?: string;
+    };
+  };
+  person_regmem_enriched2024_en?: string | EnrichedFinancialData;
+  [key: string]: string | undefined | { [key: string]: any }; // For dynamic keys like public_whip_dreammp
+}
+
 // Core hardcoded dreamMpMappings (critical policies, validated)
 const dreamMpMappings: { id: string; description: string; category: string; direction: "left" | "right" }[] = [
   { id: "20006", description: "more restrictive immigration policies", category: "Immigration", direction: "right" },
@@ -57,7 +104,7 @@ const dreamMpMappings: { id: string; description: string; category: string; dire
 const AVERAGE_TOTAL_SUPPORT_PER_MP = 30000; // £30,000
 
 // Fetch all dreammp IDs from TheyWorkForYou
-async function fetchDreamMpIds() {
+async function fetchDreamMpIds(): Promise<DreamMp[]> {
   try {
     const apiKey = process.env.TWFY_API_KEY;
     if (!apiKey) throw new Error("TWFY_API_KEY is not set");
@@ -73,12 +120,11 @@ async function fetchDreamMpIds() {
 }
 
 // Validate mappings against TheyWorkForYou data
-async function validateMappings(fetchedData: any[]) {
+async function validateMappings(fetchedData: DreamMp[]): Promise<void> {
   if (!Array.isArray(fetchedData)) {
     console.warn("validateMappings: fetchedData is not an array, skipping validation");
     return;
   }
-  const hardcodedIds = dreamMpMappings.map(m => m.id);
   fetchedData.forEach(entry => {
     const mapping = dreamMpMappings.find(m => m.id === entry.id);
     if (!mapping) {
@@ -90,7 +136,7 @@ async function validateMappings(fetchedData: any[]) {
 }
 
 // Filter valid debates (includes major 1, 2, 3)
-const filterValidDebates = (debates: any[]) =>
+const filterValidDebates = (debates: Debate[]): Debate[] =>
   debates.filter(debate => {
     const body = debate.body?.replace(/<[^>]+>/g, "") || "";
     return (
@@ -101,7 +147,7 @@ const filterValidDebates = (debates: any[]) =>
   });
 
 // Count constituency mentions
-const getConstituencyMentions = (debates: any[], constituency: string) => {
+const getConstituencyMentions = (debates: Debate[], constituency: string): number => {
   const regex = new RegExp(`\\b${constituency}\\b|\\b${constituency}-on-Sea\\b`, "i");
   return debates.reduce((count, debate) => {
     const body = debate.body?.replace(/<[^>]+>/g, "") || "";
@@ -110,19 +156,19 @@ const getConstituencyMentions = (debates: any[], constituency: string) => {
 };
 
 // Parse financial support
-const parseFinancialSupport = (enrichedData: any): FinancialSupport => {
+const parseFinancialSupport = (enrichedData: EnrichedFinancialData | string | undefined): FinancialSupport => {
   let totalDonations = 0;
   let totalGiftsAndBenefits = 0;
   let donationType = "non-campaign";
 
   if (enrichedData) {
-    const data = typeof enrichedData === "string" ? JSON.parse(enrichedData) : enrichedData;
+    const data: EnrichedFinancialData = typeof enrichedData === "string" ? JSON.parse(enrichedData) : enrichedData;
     for (const category of data.categories || []) {
       if (category.category_id === "2") {
         const summaries = category.summaries || [];
         for (const summary of summaries) {
           if (summary.comparable_id === "enriched_info") {
-            totalDonations = parseFloat(summary.details.find((d: any) => d.slug === "all_income")?.value || "0");
+            totalDonations = parseFloat(summary.details.find((d) => d.slug === "all_income")?.value || "0");
             donationType = "campaign";
           }
         }
@@ -130,7 +176,7 @@ const parseFinancialSupport = (enrichedData: any): FinancialSupport => {
         const summaries = category.summaries || [];
         for (const summary of summaries) {
           if (summary.comparable_id === "enriched_info") {
-            totalGiftsAndBenefits = parseFloat(summary.details.find((d: any) => d.slug === "all_income")?.value || "0");
+            totalGiftsAndBenefits = parseFloat(summary.details.find((d) => d.slug === "all_income")?.value || "0");
           }
         }
       }
@@ -186,14 +232,14 @@ export async function getVotingAlignments(name: string, constituency: string): P
     if (!apiKey) throw new Error("TWFY_API_KEY is not set in environment variables.");
 
     // Fetch MP data
-    let mpData: any;
+    let mpData: MpData;
     try {
       const response = await fetch(
         `https://www.theyworkforyou.com/api/getMP?key=${apiKey}&name=${encodeURIComponent(name)}&constituency=${encodeURIComponent(constituency)}&output=js`
       );
       if (!response.ok) throw new Error(`Failed to fetch MP data: ${response.status}`);
-      mpData = await response.json();
-      mpData = Array.isArray(mpData) ? mpData[0] : mpData;
+      const rawData = await response.json();
+      mpData = Array.isArray(rawData) ? rawData[0] : rawData;
       console.log("TheyWorkForYou getMP Response:", mpData);
     } catch (error) {
       console.error("Error fetching MP data:", error);
@@ -205,7 +251,7 @@ export async function getVotingAlignments(name: string, constituency: string): P
     if (!personId || !memberId) throw new Error("Could not find person_id or member_id for the MP");
 
     // Fetch MP info
-    let mpInfo: any;
+    let mpInfo: MpInfo;
     try {
       const response = await fetch(
         `https://www.theyworkforyou.com/api/getMPInfo?key=${apiKey}&id=${personId}&output=js`
@@ -236,7 +282,7 @@ export async function getVotingAlignments(name: string, constituency: string): P
     // Profile Summary
     const fullName = mpData.full_name || name;
     const party = mpData.party || "Unknown";
-    let startYear = mpInfo.maiden_speech
+    const startYear = mpInfo.maiden_speech
       ? parseInt(mpInfo.maiden_speech.match(/(\d{4}-\d{2}-\d{2})/)?.[1]?.split("-")[0] || new Date().getFullYear().toString(), 10)
       : new Date().getFullYear();
     const yearsInOffice = new Date().getFullYear() - startYear;
@@ -252,9 +298,9 @@ export async function getVotingAlignments(name: string, constituency: string): P
     };
 
     // Speech Activity
-    let debates: any[] = [];
+    let debates: Debate[] = [];
     try {
-      let allDebates: any[] = [];
+      let allDebates: Debate[] = [];
       let page = 1;
       const perPage = 500;
       while (true) {
@@ -263,7 +309,7 @@ export async function getVotingAlignments(name: string, constituency: string): P
         );
         if (!response.ok) break;
         const data = await response.json();
-        const rows = data.rows || [];
+        const rows = (data.rows || []) as Debate[];
         allDebates = allDebates.concat(rows);
         if (rows.length < perPage) break;
         page++;
@@ -348,84 +394,85 @@ export async function getVotingAlignments(name: string, constituency: string): P
       localReferences,
     };
 
-// Parliamentary Activity
-const topTopicsMap: { [topic: string]: number } = {};
-debates.forEach(debate => {
-  const lowerDesc = debate.body?.toLowerCase().replace(/<[^>]+>/g, "") || "";
-  let topic = debate.section || "General";
-  if (lowerDesc.includes("immigration") || lowerDesc.includes("border control") || lowerDesc.includes("asylum")) topic = "Immigration";
-  else if (lowerDesc.includes("health") || lowerDesc.includes("nhs") || lowerDesc.includes("hospital")) topic = "Health & NHS";
-  else if (lowerDesc.includes("education") || lowerDesc.includes("school") || lowerDesc.includes("university")) topic = "Education";
-  else if (lowerDesc.includes("housing") || lowerDesc.includes("homeless") || lowerDesc.includes("rent")) topic = "Housing";
-  else if (lowerDesc.includes("climate") || lowerDesc.includes("environment") || lowerDesc.includes("net zero")) topic = "Environment & Climate";
-  else if (lowerDesc.includes("economy") || lowerDesc.includes("tax") || lowerDesc.includes("budget")) topic = "Economy & Taxation";
-  else if (lowerDesc.includes("crime") || lowerDesc.includes("police") || lowerDesc.includes("justice")) topic = "Crime & Policing";
-  else if (lowerDesc.includes("pension") || lowerDesc.includes("triple lock") || lowerDesc.includes("benefits")) topic = "Welfare & Cost of Living";
-  else if (lowerDesc.includes("eu") || lowerDesc.includes("brexit") || lowerDesc.includes("european union")) topic = "Foreign Policy & EU";
-  else if (lowerDesc.includes("transport") || lowerDesc.includes("rail") || lowerDesc.includes("road")) topic = "Transport";
-  else if (lowerDesc.includes("defence") || lowerDesc.includes("military") || lowerDesc.includes("armed forces")) topic = "Defence";
-  else if (lowerDesc.includes("energy") || lowerDesc.includes("renewable") || lowerDesc.includes("gas")) topic = "Energy";
-  else if (lowerDesc.includes("technology") || lowerDesc.includes("digital") || lowerDesc.includes("ai")) topic = "Technology & Innovation";
-  else if (lowerDesc.includes("social justice") || lowerDesc.includes("equality") || lowerDesc.includes("diversity")) topic = "Social Justice";
-  else if (lowerDesc.includes("employment") || lowerDesc.includes("jobs") || lowerDesc.includes("unemployment")) topic = "Employment";
-  else if (lowerDesc.includes("trade") || lowerDesc.includes("export") || lowerDesc.includes("import")) topic = "Trade";
-  else if (lowerDesc.includes("agriculture") || lowerDesc.includes("farming") || lowerDesc.includes("rural")) topic = "Agriculture & Rural Affairs";
-  else if (lowerDesc.includes("culture") || lowerDesc.includes("arts") || lowerDesc.includes("sport")) topic = "Culture & Sport";
-  else if (lowerDesc.includes("local government") || lowerDesc.includes("council") || lowerDesc.includes("devolution")) topic = "Local Government";
-  else if (lowerDesc.includes("terrorism") || lowerDesc.includes("security") || lowerDesc.includes("counter-terrorism")) topic = "National Security";
-  topTopicsMap[topic] = (topTopicsMap[topic] || 0) + 1;
-});
+    // Parliamentary Activity
+    const topTopicsMap: { [topic: string]: number } = {};
+    debates.forEach(debate => {
+      const lowerDesc = debate.body?.toLowerCase().replace(/<[^>]+>/g, "") || "";
+      let topic = debate.section || "General";
+      if (lowerDesc.includes("immigration") || lowerDesc.includes("border control") || lowerDesc.includes("asylum")) topic = "Immigration";
+      else if (lowerDesc.includes("health") || lowerDesc.includes("nhs") || lowerDesc.includes("hospital")) topic = "Health & NHS";
+      else if (lowerDesc.includes("education") || lowerDesc.includes("school") || lowerDesc.includes("university")) topic = "Education";
+      else if (lowerDesc.includes("housing") || lowerDesc.includes("homeless") || lowerDesc.includes("rent")) topic = "Housing";
+      else if (lowerDesc.includes("climate") || lowerDesc.includes("environment") || lowerDesc.includes("net zero")) topic = "Environment & Climate";
+      else if (lowerDesc.includes("economy") || lowerDesc.includes("tax") || lowerDesc.includes("budget")) topic = "Economy & Taxation";
+      else if (lowerDesc.includes("crime") || lowerDesc.includes("police") || lowerDesc.includes("justice")) topic = "Crime & Policing";
+      else if (lowerDesc.includes("pension") || lowerDesc.includes("triple lock") || lowerDesc.includes("benefits")) topic = "Welfare & Cost of Living";
+      else if (lowerDesc.includes("eu") || lowerDesc.includes("brexit") || lowerDesc.includes("european union")) topic = "Foreign Policy & EU";
+      else if (lowerDesc.includes("transport") || lowerDesc.includes("rail") || lowerDesc.includes("road")) topic = "Transport";
+      else if (lowerDesc.includes("defence") || lowerDesc.includes("military") || lowerDesc.includes("armed forces")) topic = "Defence";
+      else if (lowerDesc.includes("energy") || lowerDesc.includes("renewable") || lowerDesc.includes("gas")) topic = "Energy";
+      else if (lowerDesc.includes("technology") || lowerDesc.includes("digital") || lowerDesc.includes("ai")) topic = "Technology & Innovation";
+      else if (lowerDesc.includes("social justice") || lowerDesc.includes("equality") || lowerDesc.includes("diversity")) topic = "Social Justice";
+      else if (lowerDesc.includes("employment") || lowerDesc.includes("jobs") || lowerDesc.includes("unemployment")) topic = "Employment";
+      else if (lowerDesc.includes("trade") || lowerDesc.includes("export") || lowerDesc.includes("import")) topic = "Trade";
+      else if (lowerDesc.includes("agriculture") || lowerDesc.includes("farming") || lowerDesc.includes("rural")) topic = "Agriculture & Rural Affairs";
+      else if (lowerDesc.includes("culture") || lowerDesc.includes("arts") || lowerDesc.includes("sport")) topic = "Culture & Sport";
+      else if (lowerDesc.includes("local government") || lowerDesc.includes("council") || lowerDesc.includes("devolution")) topic = "Local Government";
+      else if (lowerDesc.includes("terrorism") || lowerDesc.includes("security") || lowerDesc.includes("counter-terrorism")) topic = "National Security";
+      topTopicsMap[topic] = (topTopicsMap[topic] || 0) + 1;
+    });
 
-const topTopics = Object.entries(topTopicsMap)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 5)
-  .map(([topic, count]) => `${topic} (${count} mentions)`);
+    const topTopics = Object.entries(topTopicsMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([topic, count]) => `${topic} (${count} mentions)`);
 
-const parliamentaryActivity = {
-  speechCount,
-  topTopics,
-  constituencyMentions,
-  link: `https://www.theyworkforyou.com/debates/?person=${personId}`,
-};
+    const parliamentaryActivity = {
+      speechCount,
+      topTopics,
+      constituencyMentions,
+      link: `https://www.theyworkforyou.com/debates/?person=${personId}`,
+    };
 
-// Committees and Roles
-const roles = mpData.office
-  ?.filter((office: any) => {
-    const position = office.position?.toLowerCase() || '';
-    // Include ministerial, spokesperson, shadow, or other frontbench roles, exclude committee memberships
-    return (
-      (position.includes('minister') ||
-        position.includes('spokesperson') ||
-        position.includes('shadow') ||
-        position.includes('whip')) &&
-      !position.includes('committee')
-    );
-  })
-  .map((office: any) => office.position)
-  .join(', ') || 'None';
+    // Committees and Roles
+    const roles = mpData.office
+      ?.filter((office: { position: string; dept?: string }) => {
+        const position = office.position?.toLowerCase() || '';
+        // Include ministerial, spokesperson, shadow, or other frontbench roles, exclude committee memberships
+        return (
+          (position.includes('minister') ||
+            position.includes('spokesperson') ||
+            position.includes('shadow') ||
+            position.includes('whip')) &&
+          !position.includes('committee')
+        );
+      })
+      .map((office: { position: string }) => office.position)
+      .join(', ') || 'None';
 
-const committees = mpData.office
-  ?.filter((office: any) => {
-    // Use dept if it indicates a committee, or check position for 'committee'
-    const dept = office.dept?.toLowerCase() || '';
-    const position = office.position?.toLowerCase() || '';
-    return dept.includes('committee') || position.includes('committee');
-  })
-  .map((office: any) => office.dept || office.position)
-  .join(', ') || 'None';
+    const committees = mpData.office
+      ?.filter((office: { position: string; dept?: string }) => {
+        // Use dept if it indicates a committee, or check position for 'committee'
+        const dept = office.dept?.toLowerCase() || '';
+        const position = office.position?.toLowerCase() || '';
+        return dept.includes('committee') || position.includes('committee');
+      })
+      .map((office: { position: string; dept?: string }) => office.dept || office.position)
+      .join(', ') || 'None';
 
-const focus = (() => {
-  const committeeLower = committees.toLowerCase();
-  if (committeeLower.includes('environmental') || committeeLower.includes('environment')) return 'Environmental Policy';
-  if (committeeLower.includes('education')) return 'Education Policy';
-  if (committeeLower.includes('justice')) return 'Justice Policy';
-  if (committeeLower.includes('health')) return 'Health Policy';
-  if (committeeLower.includes('defense') || committeeLower.includes('defence')) return 'Defense Policy';
-  if (committeeLower.includes('transport')) return 'Transport Policy';
-  return 'General';
-})();
+    const focus = (() => {
+      const committeeLower = committees.toLowerCase();
+      if (committeeLower.includes('environmental') || committeeLower.includes('environment')) return 'Environmental Policy';
+      if (committeeLower.includes('education')) return 'Education Policy';
+      if (committeeLower.includes('justice')) return 'Justice Policy';
+      if (committeeLower.includes('health')) return 'Health Policy';
+      if (committeeLower.includes('defense') || committeeLower.includes('defence')) return 'Defense Policy';
+      if (committeeLower.includes('transport')) return 'Transport Policy';
+      return 'General';
+    })();
 
-const committeesAndRoles = { roles, committees, focus };
+    const committeesAndRoles = { roles, committees, focus };
+
     // Overall Summary
     const greenCount = [votingAttendance, speechActivity, rebellions, topicClarity, localReferences].filter(metric => metric.color === "green").length;
     const engagementLevel = greenCount >= 3 ? "engaged" : greenCount >= 1 ? "moderately engaged" : "less engaged";
@@ -451,17 +498,17 @@ const committeesAndRoles = { roles, committees, focus };
       summary: "Election Donations: £0 cash, £0 in-kind (campaign-specific, excludes non-campaign gifts).",
     };
     if (mpInfo.person_regmem_enriched2024_en) {
-      const enrichedData = typeof mpInfo.person_regmem_enriched2024_en === "string" ? JSON.parse(mpInfo.person_regmem_enriched2024_en) : mpInfo.person_regmem_enriched2024_en;
+      const enrichedData: EnrichedFinancialData = typeof mpInfo.person_regmem_enriched2024_en === "string" ? JSON.parse(mpInfo.person_regmem_enriched2024_en) : mpInfo.person_regmem_enriched2024_en;
       let cash = 0;
       let inKind = 0;
-      let sourceSummary = financialSupport.donationType === "campaign" ? "campaign donations" : "no campaign donations";
+      const sourceSummary = financialSupport.donationType === "campaign" ? "campaign donations" : "no campaign donations";
       for (const category of enrichedData.categories || []) {
         if (category.category_id === "2") {
           const summaries = category.summaries || [];
           for (const summary of summaries) {
             if (summary.comparable_id === "enriched_info") {
-              cash = parseFloat(summary.details.find((d: any) => d.slug === "cash_sum")?.value || "0");
-              inKind = parseFloat(summary.details.find((d: any) => d.slug === "in_kind_sum")?.value || "0");
+              cash = parseFloat(summary.details.find((d) => d.slug === "cash_sum")?.value || "0");
+              inKind = parseFloat(summary.details.find((d) => d.slug === "in_kind_sum")?.value || "0");
             }
           }
         }

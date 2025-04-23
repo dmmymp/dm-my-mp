@@ -45,7 +45,7 @@ const MpOverview: React.FC<MpOverviewProps> = ({
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg mb-6 w-full">
       <div className="flex items-center mb-6">
-        <img
+        <image
           src={photoUrl}
           alt={name}
           className="w-20 h-28 rounded-md object-cover mr-4 border"

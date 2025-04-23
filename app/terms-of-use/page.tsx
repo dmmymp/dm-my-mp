@@ -7,7 +7,7 @@ export default function TermsOfUse() {
         <strong>Last Updated:</strong> 23 April 2025
       </p>
       <p className="text-gray-700 dark:text-gray-300 mb-4">
-        Welcome to DM My MP ("we", "us", or "our"). These Terms of Use ("Terms") govern your access to and use of our tool, which assists users in drafting and sending letters to Members of Parliament (MPs) in the UK. By using DM My MP, you agree to be bound by these Terms. If you do not agree, please do not use our service.
+        Welcome to DM My MP ({"we"}, {"us"}, or {"our"}). These Terms of Use ({"Terms"}) govern your access to and use of our tool, which assists users in drafting and sending letters to Members of Parliament (MPs) in the UK. By using DM My MP, you agree to be bound by these Terms. If you do not agree, please do not use our service.
       </p>
 
       <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">1. Purpose of the Service</h2>
@@ -68,7 +68,7 @@ export default function TermsOfUse() {
 
       <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">9. Changes to These Terms</h2>
       <p className="text-gray-700 dark:text-gray-300 mb-4">
-        We may update these Terms from time to time to reflect changes in our practices or legal requirements. We will notify you of significant changes by updating the "Last Updated" date at the top of this page. Your continued use of the tool after such changes constitutes acceptance of the updated Terms.
+        We may update these Terms from time to time to reflect changes in our practices or legal requirements. We will notify you of significant changes by updating the {"Last Updated"} date at the top of this page. Your continued use of the tool after such changes constitutes acceptance of the updated Terms.
       </p>
 
       <h2 className="text-xl font-semibold mb-2 text-black dark:text-white">10. Contact Us</h2>

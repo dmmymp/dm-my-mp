@@ -30,7 +30,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const ip = req.headers.get("x-forwarded-for") || "unknown";
   try {
     await rateLimiter.consume(ip);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   }
 
