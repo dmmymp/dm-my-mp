@@ -1,4 +1,6 @@
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 // Extend the Window interface to include grecaptcha
 interface Window {
   grecaptcha: {

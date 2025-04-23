@@ -8,7 +8,7 @@
       "esnext"
     ],
     "allowJs": true,
-    "skipLibCheck": true, // Skip type checking of declaration files
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
@@ -17,7 +17,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve", // Ensure JSX is preserved for Next.js
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -36,7 +36,8 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "types/**/*.d.ts" // Added to include custom type declarations
+    "types/**/*.d.ts",
+    "app/types/**/*.d.ts" // Added to explicitly include /app/types
   ],
   "exclude": [
     "node_modules"
