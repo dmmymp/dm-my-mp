@@ -674,7 +674,7 @@ Yours sincerely,
       const text = `I wrote to my MP about ${formData.issue.split(" - ")[0]} using DM My MP. Join me in making your voice heard!`;
       const xUrl = `https://x.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
       window.open(xUrl, "_blank", "width=600,height=400");
-    } catch (err) {
+    } catch {
       setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
       const url = window.location.href;
       const text = `I wrote to my MP about ${formData.issue.split(" - ")[0]} using DM My MP. Join me in making your voice heard!`;
@@ -693,7 +693,7 @@ Yours sincerely,
       const summary = `Using DM My MP, I sent a letter to my MP to address ${formData.issue.split(" - ")[0]}. Join me in engaging with your representative to make a difference!`;
       const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(summary)}`;
       window.open(linkedInUrl, "_blank", "width=600,height=400");
-    } catch (err) {
+    } catch {
       setError("Couldn’t generate screenshot or copy to clipboard. Sharing text only.");
       const url = window.location.href;
       const title = `I Wrote to My MP About ${formData.issue.split(" - ")[0]}`;

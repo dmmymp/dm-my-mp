@@ -1,7 +1,6 @@
 
 import fetch from "node-fetch";
 
-type VotingRecord = { topic: string; votes: number };
 type EngagementMetric = {
   value: string | number;
   color: "green" | "amber" | "red";
@@ -30,7 +29,7 @@ type FinancialSupport = {
   donationType: string;
 };
 
-// New interfaces for TypeScript
+// Interfaces for TypeScript
 interface DreamMp {
   id: string;
   description: string;
@@ -73,7 +72,9 @@ interface MpInfo {
     };
   };
   person_regmem_enriched2024_en?: string | EnrichedFinancialData;
-  [key: string]: string | undefined | { [key: string]: any }; // For dynamic keys like public_whip_dreammp
+  [key: `public_whip_dreammp${string}_both_voted`]: string | undefined;
+  [key: `public_whip_dreammp${string}_distance`]: string | undefined;
+  [key: `public_whip_dreammp${string}_abstentions`]: string | undefined;
 }
 
 // Core hardcoded dreamMpMappings (critical policies, validated)
@@ -111,7 +112,6 @@ async function fetchDreamMpIds(): Promise<DreamMp[]> {
     const response = await fetch(`https://www.theyworkforyou.com/api/getDreamMPs?key=${apiKey}&output=js`);
     if (!response.ok) throw new Error(`Failed to fetch dreammp IDs: ${response.status}`);
     const data = await response.json();
-    // Ensure data is an array
     return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error("Error fetching dreammp IDs:", error);
@@ -190,7 +190,7 @@ const parseFinancialSupport = (enrichedData: EnrichedFinancialData | string | un
     ? `below the average of £${AVERAGE_TOTAL_SUPPORT_PER_MP.toLocaleString()} per MP`
     : `equal to the average of £${AVERAGE_TOTAL_SUPPORT_PER_MP.toLocaleString()} per MP`;
 
-  return { totalDonations, totalGiftsAndBenefits, totalSupport, comparisonToAverage, donationType };
+  return { totalSupport, totalDonations, totalGiftsAndBenefits, comparisonToAverage, donationType };
 };
 
 export async function getVotingAlignments(name: string, constituency: string): Promise<{
@@ -438,7 +438,6 @@ export async function getVotingAlignments(name: string, constituency: string): P
     const roles = mpData.office
       ?.filter((office: { position: string; dept?: string }) => {
         const position = office.position?.toLowerCase() || '';
-        // Include ministerial, spokesperson, shadow, or other frontbench roles, exclude committee memberships
         return (
           (position.includes('minister') ||
             position.includes('spokesperson') ||
@@ -452,7 +451,6 @@ export async function getVotingAlignments(name: string, constituency: string): P
 
     const committees = mpData.office
       ?.filter((office: { position: string; dept?: string }) => {
-        // Use dept if it indicates a committee, or check position for 'committee'
         const dept = office.dept?.toLowerCase() || '';
         const position = office.position?.toLowerCase() || '';
         return dept.includes('committee') || position.includes('committee');
