@@ -1,6 +1,8 @@
+
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
 import MpOverview from "./MpOverview";
 
 interface MpData {
@@ -8,6 +10,7 @@ interface MpData {
   constituency: string;
   party: string;
   email?: string;
+  image?: string | null;
 }
 
 interface MpStatsData {
@@ -29,11 +32,25 @@ const MpStatsPage: React.FC = () => {
   const [mpStats, setMpStats] = useState<MpStatsData | null>(null);
   const [postcode, setPostcode] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+
+  const handleRecaptchaVerify = useCallback((token: string | null) => {
+    setRecaptchaToken(token);
+  }, []);
 
   const handleSearch = async () => {
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA verification");
+      return;
+    }
+
     setError(null);
     try {
-      const mpResponse = await fetch(`/api/getMP?postcode=${encodeURIComponent(postcode)}`);
+      const mpResponse = await fetch(`/api/getMP?postcode=${encodeURIComponent(postcode)}`, {
+        headers: {
+          "X-Recaptcha-Token": recaptchaToken,
+        },
+      });
       if (!mpResponse.ok) throw new Error(`Failed to fetch MP data: ${mpResponse.status} ${mpResponse.statusText}`);
       const mpData: MpData = await mpResponse.json();
       if (mpData.error) throw new Error(mpData.error);
@@ -42,7 +59,7 @@ const MpStatsPage: React.FC = () => {
       const statsResponse = await fetch(
         `/api/fetchMpStats?name=${encodeURIComponent(mpData.name)}&constituency=${encodeURIComponent(mpData.constituency)}`
       );
-      if (!statsResponse.ok) throw new Error(`Failed to fetch MP stats: ${statsResponse.status} ${statsResponse.statusText}`);
+      if (!statsResponse.ok) throw new Error(`Failed to fetch MP stats: ${statsResponse.status} ${mpResponse.statusText}`);
       const statsData: MpStatsData = await statsResponse.json();
       if (statsData.error) throw new Error(statsData.error);
       setMpStats(statsData);
@@ -72,6 +89,13 @@ const MpStatsPage: React.FC = () => {
         </button>
       </div>
 
+      <div className="mb-6">
+        <ReCAPTCHA
+          sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "your-site-key-here"}
+          onChange={handleRecaptchaVerify}
+        />
+      </div>
+
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       {mp && mpStats && (
@@ -79,7 +103,6 @@ const MpStatsPage: React.FC = () => {
           name={mp.name}
           constituency={mp.constituency}
           party={mp.party}
-          photoUrl={`https://members-api.parliament.uk/api/Members/${mpStats.mpId}/Thumbnail`}
           roles={mpStats.ministerialRoles.map((role) => role.name)}
           speechCount={mpStats.recentActivity.length}
           debateRank={123}
@@ -87,7 +110,6 @@ const MpStatsPage: React.FC = () => {
           attendRank={456}
           responseRate="Unknown"
           giftsSummary={mpStats.financialInterests.join('; ') || 'No declared interests'}
-          votingFocus={mpStats.votingRecord.map((v) => v.topic)}
           votingRecord={mpStats.votingRecord}
           voteAttendance={mpStats.voteAttendance}
           votingAlignment={mpStats.votingAlignment}

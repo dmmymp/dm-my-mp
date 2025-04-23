@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BarChart, Bar, XAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -5,7 +6,6 @@ interface MpOverviewProps {
   name: string;
   constituency: string;
   party: string;
-  photoUrl?: string;
   roles?: string[];
   speechCount?: number;
   debateRank?: number;
@@ -23,7 +23,6 @@ const MpOverview: React.FC<MpOverviewProps> = ({
   name,
   constituency,
   party,
-  photoUrl = '/default-mp.jpg',
   roles = [],
   speechCount = 0,
   debateRank,
@@ -44,20 +43,12 @@ const MpOverview: React.FC<MpOverviewProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg mb-6 w-full">
-      <div className="flex items-center mb-6">
-        <image
-          src={photoUrl}
-          alt={name}
-          className="w-20 h-28 rounded-md object-cover mr-4 border"
-          onError={(e) => (e.currentTarget.src = '/default-mp.jpg')}
-        />
-        <div>
-          <h2 className="text-xl font-semibold">{name}</h2>
-          <p className="text-gray-600">{party} MP for {constituency}</p>
-          {roles.length > 0 && (
-            <p className="text-sm text-blue-600 mt-1">{roles.join(', ')}</p>
-          )}
-        </div>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold">{name}</h2>
+        <p className="text-gray-600">{party} MP for {constituency}</p>
+        {roles.length > 0 && (
+          <p className="text-sm text-blue-600 mt-1">{roles.join(', ')}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
