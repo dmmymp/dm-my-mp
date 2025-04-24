@@ -168,7 +168,8 @@ const parseFinancialSupport = (enrichedData: EnrichedFinancialData | string | un
         const summaries = category.summaries || [];
         for (const summary of summaries) {
           if (summary.comparable_id === "enriched_info") {
-            totalDonations = parseFloat(summary.details.find((d) => d.slug === "all_income")?.value || "0");
+            const details = summary.details || [];
+            totalDonations = parseFloat(details.find((d) => d.slug === "all_income")?.value || "0");
             donationType = "campaign";
           }
         }
@@ -176,7 +177,8 @@ const parseFinancialSupport = (enrichedData: EnrichedFinancialData | string | un
         const summaries = category.summaries || [];
         for (const summary of summaries) {
           if (summary.comparable_id === "enriched_info") {
-            totalGiftsAndBenefits = parseFloat(summary.details.find((d) => d.slug === "all_income")?.value || "0");
+            const details = summary.details || [];
+            totalGiftsAndBenefits = parseFloat(details.find((d) => d.slug === "all_income")?.value || "0");
           }
         }
       }
@@ -192,12 +194,6 @@ const parseFinancialSupport = (enrichedData: EnrichedFinancialData | string | un
 
   return { totalSupport, totalDonations, totalGiftsAndBenefits, comparisonToAverage, donationType };
 };
-
-// Helper function to safely access dynamic keys on MpInfo
-function getMpInfoValue(mpInfo: MpInfo, key: string, defaultValue: string): string {
-  const value = (mpInfo as any)[key];
-  return typeof value === "string" ? value : defaultValue;
-}
 
 export async function getVotingAlignments(name: string, constituency: string): Promise<{
   profileSummary: {
@@ -354,10 +350,13 @@ export async function getVotingAlignments(name: string, constituency: string): P
 
     // Top Voting Topics
     const votingTopics: VotingTopic[] = mappings.map(mapping => {
-      const key = `public_whip_dreammp${mapping.id}_both_voted`;
-      const bothVoted = parseInt(getMpInfoValue(mpInfo, key, "0"), 10);
-      const distance = parseFloat(getMpInfoValue(mpInfo, `public_whip_dreammp${mapping.id}_distance`, "1"));
-      const absences = parseInt(getMpInfoValue(mpInfo, `public_whip_dreammp${mapping.id}_abstentions`, "0"), 10);
+      const bothVotedKey = `public_whip_dreammp${mapping.id}_both_voted` as const;
+      const distanceKey = `public_whip_dreammp${mapping.id}_distance` as const;
+      const abstentionsKey = `public_whip_dreammp${mapping.id}_abstentions` as const;
+
+      const bothVoted = parseInt(mpInfo[bothVotedKey] || "0", 10);
+      const distance = parseFloat(mpInfo[distanceKey] || "1");
+      const absences = parseInt(mpInfo[abstentionsKey] || "0", 10);
       const votesFor = Math.round(bothVoted * (mapping.direction === "left" ? 1 - distance : distance));
       const votesAgainst = Math.round(bothVoted * (mapping.direction === "left" ? distance : 1 - distance));
       return {
@@ -525,8 +524,9 @@ export async function getVotingAlignments(name: string, constituency: string): P
           const summaries = category.summaries || [];
           for (const summary of summaries) {
             if (summary.comparable_id === "enriched_info") {
-              cash = parseFloat(summary.details.find((d) => d.slug === "cash_sum")?.value || "0");
-              inKind = parseFloat(summary.details.find((d) => d.slug === "in_kind_sum")?.value || "0");
+              const details = summary.details || [];
+              cash = parseFloat(details.find((d) => d.slug === "cash_sum")?.value || "0");
+              inKind = parseFloat(details.find((d) => d.slug === "in_kind_sum")?.value || "0");
             }
           }
         }
