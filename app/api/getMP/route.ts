@@ -21,7 +21,7 @@ interface MPRecord {
 
 // Rate limiter: max 5 requests per IP per hour
 const rateLimiter = new RateLimiterMemory({
-  points: 5,
+  points: 10,
   duration: 3600, // 1 hour
 });
 

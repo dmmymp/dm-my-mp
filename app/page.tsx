@@ -24,7 +24,7 @@ import DOMPurify from "dompurify"; // Added for input sanitization
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 // reCAPTCHA site key for bot protection
-const RECAPTCHA_SITE_KEY="6Ldv3CErAAAAAKdyUdc81tDy9FL8ouCLRDSle3dI" ; 
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY; 
 
 
 
