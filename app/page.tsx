@@ -325,8 +325,8 @@ export default function Home() {
   const [mpStats, setMpStats] = useState<MPStats | null>(null);
   const [startYear, setStartYear] = useState<number | null>(null);
 
- // Load reCAPTCHA script and generate token
- useEffect(() => {
+// Load reCAPTCHA script and generate token
+useEffect(() => {
   if (!RECAPTCHA_SITE_KEY) {
     console.error("reCAPTCHA site key is not set in environment variables");
     setError("reCAPTCHA configuration error. Please contact support.");
@@ -342,7 +342,7 @@ export default function Home() {
     if (window.grecaptcha) {
       window.grecaptcha.ready(() => {
         window.grecaptcha
-          .execute(RECAPTCHA_SITE_KEY, { action: "submit" })
+          .execute(RECAPTCHA_SITE_KEY as string, { action: "submit" })
           .then((token: string) => {
             setRecaptchaToken(token);
           })
@@ -469,14 +469,15 @@ Email: ${formData.userEmail}
       console.error(err);
     } finally {
       setLoading(false);
-      // Refresh reCAPTCHA token after submission
-      window.grecaptcha.ready(() => {
-        window.grecaptcha
-          .execute(RECAPTCHA_SITE_KEY, { action: "submit" })
-          .then((token: string) => {
-            setRecaptchaToken(token);
-          });
-      });
+
+// Refresh reCAPTCHA token after submission
+window.grecaptcha.ready(() => {
+  window.grecaptcha
+    .execute(RECAPTCHA_SITE_KEY as string, { action: "submit" })
+    .then((token: string) => {
+      setRecaptchaToken(token);
+    });
+});
     }
   };
 
