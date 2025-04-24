@@ -193,6 +193,12 @@ const parseFinancialSupport = (enrichedData: EnrichedFinancialData | string | un
   return { totalSupport, totalDonations, totalGiftsAndBenefits, comparisonToAverage, donationType };
 };
 
+// Helper function to safely access dynamic keys on MpInfo
+function getMpInfoValue(mpInfo: MpInfo, key: string, defaultValue: string): string {
+  const value = (mpInfo as any)[key];
+  return typeof value === "string" ? value : defaultValue;
+}
+
 export async function getVotingAlignments(name: string, constituency: string): Promise<{
   profileSummary: {
     fullName: string;
@@ -257,7 +263,11 @@ export async function getVotingAlignments(name: string, constituency: string): P
         `https://www.theyworkforyou.com/api/getMPInfo?key=${apiKey}&id=${personId}&output=js`
       );
       if (!response.ok) throw new Error(`Failed to fetch MP info: ${response.status}`);
-      mpInfo = await response.json();
+      const data = await response.json() as MpInfo;
+      if (!data || typeof data !== "object" || !("by_member_id" in data)) {
+        throw new Error("Invalid MP info response: Missing required fields");
+      }
+      mpInfo = data;
       console.log("TheyWorkForYou getMPInfo Response:", mpInfo);
     } catch (error) {
       console.error("Error fetching MP info:", error);
@@ -308,8 +318,8 @@ export async function getVotingAlignments(name: string, constituency: string): P
           `https://www.theyworkforyou.com/api/getHansard?key=${apiKey}&person=${personId}&order=d&num=${perPage}&page=${page}&output=js`
         );
         if (!response.ok) break;
-        const data = await response.json();
-        const rows = (data.rows || []) as Debate[];
+        const data = await response.json() as { rows?: Debate[] };
+        const rows = Array.isArray(data.rows) ? data.rows : [];
         allDebates = allDebates.concat(rows);
         if (rows.length < perPage) break;
         page++;
@@ -321,7 +331,12 @@ export async function getVotingAlignments(name: string, constituency: string): P
 
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const speechCount = debates.filter(debate => new Date(debate.hdate) >= oneYearAgo).length;
+    const speechCount = debates.filter(debate => {
+      if (!debate.hdate || typeof debate.hdate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(debate.hdate)) {
+        return false;
+      }
+      return new Date(debate.hdate) >= oneYearAgo;
+    }).length;
     const speechActivity: EngagementMetric = {
       value: speechCount,
       color: speechCount > 20 ? "green" : speechCount >= 5 ? "amber" : "red",
@@ -340,9 +355,9 @@ export async function getVotingAlignments(name: string, constituency: string): P
     // Top Voting Topics
     const votingTopics: VotingTopic[] = mappings.map(mapping => {
       const key = `public_whip_dreammp${mapping.id}_both_voted`;
-      const bothVoted = parseInt(mpInfo[key] || "0", 10);
-      const distance = parseFloat(mpInfo[`public_whip_dreammp${mapping.id}_distance`] || "1");
-      const absences = parseInt(mpInfo[`public_whip_dreammp${mapping.id}_abstentions`] || "0", 10);
+      const bothVoted = parseInt(getMpInfoValue(mpInfo, key, "0"), 10);
+      const distance = parseFloat(getMpInfoValue(mpInfo, `public_whip_dreammp${mapping.id}_distance`, "1"));
+      const absences = parseInt(getMpInfoValue(mpInfo, `public_whip_dreammp${mapping.id}_abstentions`, "0"), 10);
       const votesFor = Math.round(bothVoted * (mapping.direction === "left" ? 1 - distance : distance));
       const votesAgainst = Math.round(bothVoted * (mapping.direction === "left" ? distance : 1 - distance));
       return {
@@ -363,7 +378,12 @@ export async function getVotingAlignments(name: string, constituency: string): P
     // Topic Clarity
     const totalTopicsWithVotes = topVotingTopics.length;
     const consistentTopics = topVotingTopics.filter(
-      topic => topic.votesFor / (topic.votesFor + topic.votesAgainst) > 0.75 || topic.votesAgainst / (topic.votesFor + topic.votesAgainst) > 0.75
+      topic => {
+        const totalVotes = topic.votesFor + topic.votesAgainst;
+        if (totalVotes === 0) return false; // Safety check to avoid division by zero
+        const voteRatio = topic.votesFor / totalVotes;
+        return voteRatio > 0.75 || voteRatio < 0.25;
+      }
     ).length;
     const topicClarityValue = totalTopicsWithVotes > 0 ? (consistentTopics / totalTopicsWithVotes) * 100 : 0;
     const topicClarity: EngagementMetric = {
@@ -474,7 +494,7 @@ export async function getVotingAlignments(name: string, constituency: string): P
     // Overall Summary
     const greenCount = [votingAttendance, speechActivity, rebellions, topicClarity, localReferences].filter(metric => metric.color === "green").length;
     const engagementLevel = greenCount >= 3 ? "engaged" : greenCount >= 1 ? "moderately engaged" : "less engaged";
-    const summary = `${fullName} appears ${engagementLevel} in representing ${constituency}. They have ${speechActivity.color === "green" ? "regular" : speechActivity.color === "amber" ? "occasional" : "minimal"} parliamentary activity and ${localReferences.color === "green" ? "strong" : localReferences.color === "amber" ? "some" : "no"} local focus. Their voting clarity is ${topicClarity.value.toLowerCase()}, and they show ${rebellions.color === "green" ? "balanced" : rebellions.color === "amber" ? "limited" : "no"} independence from their party.`;
+    const summary = `${fullName} appears ${engagementLevel} in representing ${constituency}. They have ${speechActivity.color === "green" ? "regular" : speechActivity.color === "amber" ? "occasional" : "minimal"} parliamentary activity and ${localReferences.color === "green" ? "strong" : localReferences.color === "amber" ? "some" : "no"} local focus. Their voting clarity is ${String(topicClarity.value).toLowerCase()}, and they show ${rebellions.color === "green" ? "balanced" : rebellions.color === "amber" ? "limited" : "no"} independence from their party.`;
 
     const scorecard = [
       { area: "Voting Attendance", status: votingAttendance.color },
