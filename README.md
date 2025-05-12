@@ -1,10 +1,4 @@
-Yes — you **should absolutely improve the README** to help attract contributors and explain the project’s purpose. Right now, it's the default Next.js boilerplate, which doesn’t give devs or civic-minded collaborators any idea what **DM My MP** is for, why it matters, or how to get involved.
 
----
-
-### 🔧 Updated README Template (You Can Paste Over the Current One)
-
-````md
 # DM My MP 📨🇬🇧
 
 A civic tech tool to **make political engagement in the UK fast, simple, and direct**.
