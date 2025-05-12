@@ -97,7 +97,5 @@ MIT — use freely, improve openly.
 ## 🙌 Contact
 
 Questions, feedback, or partnership ideas?
-Email: [info@velaryn.com](mailto:dmmymp@gmail.com)
-Twitter/X: [@VelarynHQ](https://x.com/dmmymp)
-
-```
+Email: dmmymp@gmail.com
+Twitter/X: https://x.com/dmmymp
